@@ -9,6 +9,255 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mysql"
   url      = env("DATABASE_URL")
+}
+
+model User {
+  id               Int              @id @default(autoincrement())
+  email            String           @unique
+  passwordHash     String
+  name             String
+  profileImageUrl  String?
+  mbtiType         String?
+  ageGroup         String?
+  gender           String?
+  createdAt        DateTime         @default(now())
+  lastLogin        DateTime?
+  
+  // 관계 설정
+  settings         UserSetting?
+  emotionLogs      EmotionLog[]
+  journals         Journal[]
+  goals            Goal[]
+  chatSessions     ChatSession[]
+  contentUsages    ContentUsage[]
+  emotionAnalyses  EmotionAnalysis[]
+  userInterests    UserInterest[]
+  notifications    Notification[]
+  calendarEvents   CalendarEvent[]
+  actionMissions    ActionMission[]  // <-- 이렇게 추가
+}
+
+model UserSetting {
+  userId              Int      @id
+  notificationEnabled Boolean  @default(true)
+  dailyReminderTime   String?  // 예: "08:00:00" 형식으로 저장 (시간만 저장)
+  theme               String   @default("light")
+  preferredPersona    String   @default("supportive")
+  language            String   @default("ko")
+  createdAt           DateTime @default(now())
+  updatedAt           DateTime @updatedAt
+
+  user                User     @relation(fields: [userId], references: [id])
+}
+
+model EmotionLog {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  date          DateTime // 감정 기록 날짜 (날짜만 필요하다면 DateTime 사용 후 앱단에서 포맷 조정)
+  primaryEmotion String
+  emotionValues Json
+  notes         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id])
+  journals      Journal[]
+}
+
+model Journal {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  title        String?
+  content      String
+  emotionLogId Int?     // 연결된 감정 기록 (옵션)
+  date         DateTime
+  tags         String?  // 예: "work, personal" 등으로 콤마로 구분
+  isVoiceEntry Boolean  @default(false)
+  voiceUrl     String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  user         User     @relation(fields: [userId], references: [id])
+  emotionLog   EmotionLog? @relation(fields: [emotionLogId], references: [id])
+  attachments  JournalAttachment[]
+}
+
+model JournalAttachment {
+  id         Int      @id @default(autoincrement())
+  journalId  Int
+  fileUrl    String
+  fileType   String
+  createdAt  DateTime @default(now())
+
+  journal    Journal  @relation(fields: [journalId], references: [id])
+}
+
+model Goal {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  title         String
+  description   String?
+  category      String?
+  targetValue   Int
+  unit          String
+  currentValue  Int      @default(0)
+  startDate     DateTime
+  deadline      DateTime?
+  isCompleted   Boolean  @default(false)
+  completedAt   DateTime?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User         @relation(fields: [userId], references: [id])
+  milestones    GoalMilestone[]
+  progressLogs  GoalProgress[]
+}
+
+model GoalMilestone {
+  id          Int      @id @default(autoincrement())
+  goalId      Int
+  title       String
+  isCompleted Boolean  @default(false)
+  completedAt DateTime?
+  createdAt   DateTime @default(now())
+
+  goal        Goal     @relation(fields: [goalId], references: [id])
+}
+
+model GoalProgress {
+  id        Int      @id @default(autoincrement())
+  goalId    Int
+  value     Int
+  date      DateTime
+  notes     String?
+  createdAt DateTime @default(now())
+
+  goal      Goal     @relation(fields: [goalId], references: [id])
+}
+
+model ChatSession {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  title     String?
+  persona   String   @default("supportive")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  user      User     @relation(fields: [userId], references: [id])
+  messages  ChatMessage[]
+}
+
+model ChatMessage {
+  id         Int      @id @default(autoincrement())
+  sessionId  Int
+  sender     String   // 'user' 또는 'bot'
+  content    String
+  emotion    String?
+  timestamp  DateTime @default(now())
+
+  session    ChatSession @relation(fields: [sessionId], references: [id])
+  missions   ActionMission[] // chat_messages와 연결된 미션
+}
+
+model ActionMission {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  title         String
+  description   String
+  chatMessageId Int?     // 연결된 채팅 메시지 (옵션)
+  isCompleted   Boolean  @default(false)
+  completedAt   DateTime?
+  deadline      DateTime?
+  createdAt     DateTime @default(now())
+
+  user          User     @relation(fields: [userId], references: [id])
+  chatMessage   ChatMessage? @relation(fields: [chatMessageId], references: [id])
+}
+
+model Content {
+  id           Int      @id @default(autoincrement())
+  title        String
+  description  String?
+  type         String   // 예: 'meditation', 'music', 'exercise'
+  category     String?
+  difficulty   String?
+  duration     Int?     // 초 단위
+  fileUrl      String
+  thumbnailUrl String?
+  createdAt    DateTime @default(now())
+
+  contentTags  ContentTag[]
+  usages       ContentUsage[]
+}
+
+model ContentTag {
+  contentId Int
+  tag       String
+
+  @@id([contentId, tag])
+  content   Content @relation(fields: [contentId], references: [id])
+}
+
+model ContentUsage {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  contentId   Int
+  progress    Int?     // 진행 상황 (초 또는 퍼센트)
+  completed   Boolean  @default(false)
+  startedAt   DateTime @default(now())
+  completedAt DateTime?
+
+  user        User    @relation(fields: [userId], references: [id])
+  content     Content @relation(fields: [contentId], references: [id])
+}
+
+model EmotionAnalysis {
+  id           Int      @id @default(autoincrement())
+  userId       Int
+  periodStart  DateTime
+  periodEnd    DateTime
+  analysisData Json
+  insights     String?  // 분석을 통한 인사이트 (예: 쉼표로 구분된 문자열)
+  createdAt    DateTime @default(now())
+
+  user         User     @relation(fields: [userId], references: [id])
+}
+
+model UserInterest {
+  userId   Int
+  interest String
+
+  @@id([userId, interest])
+  user     User @relation(fields: [userId], references: [id])
+}
+
+model Notification {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  title       String
+  content     String
+  type        String   // 예: 'goal', 'mission', 'reminder'
+  referenceId Int?
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id])
+}
+
+model CalendarEvent {
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  title       String
+  description String?
+  startTime   DateTime
+  endTime     DateTime
+  location    String?
+  category    String?
+  emotion     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id])
 }
