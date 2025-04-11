@@ -3,6 +3,8 @@ import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@src/prisma/prisma.service';
 import axios from 'axios';
 import { AuthUserDto } from './dto/auth-user.dto';
+import * as bcrypt from 'bcrypt';
+
 @Injectable()
 export class AuthService {
   constructor(
@@ -55,11 +57,69 @@ export class AuthService {
     }
   }
 
+  // 회원가입 로직
+  async signup(email: string, name: string, password: string) {
+    // 이메일 중복 확인
+    const existingUserByEmail = await this.prisma.user.findUnique({
+      where: { email },
+    });
+    if (existingUserByEmail) {
+      throw new HttpException('Email already exists', HttpStatus.BAD_REQUEST);
+    }
+
+    // 새로운 사용자 생성
+    const newUser = await this.prisma.user.create({
+      data: {
+        email,
+        name,
+        password,
+        authProvider: 'default',
+      },
+    });
+
+    return {
+      userId: newUser.id,
+      email: newUser.email,
+      name: newUser.name,
+    };
+  }
+
+  // 로그인 로직
+  async login(email: string, password: string) {
+    // 사용자 조회
+    const user = await this.prisma.user.findUnique({
+      where: { email },
+    });
+    if (!user || user.password !== password) {
+      throw new HttpException(
+        '유효하지 않는 이메일 혹은 비밀번호 입니다',
+        HttpStatus.FORBIDDEN
+      );
+    }
+
+    // 액세스 토큰 및 리프레시 토큰 생성
+    const accessToken = this.generateAccessToken(user.id);
+    const responseUser = this.filterUserFields(user);
+    return {
+      user: responseUser,
+      accessToken,
+    };
+  }
   private async checkUserExist(email: string): Promise<boolean> {
     const user = await this.prisma.user.findUnique({
       where: { email },
     });
     return !!user;
+  }
+
+  private filterUserFields(user: any) {
+    return {
+      userId: user.id,
+      email: user.email,
+      name: user.name,
+      profileImageUrl: user.profileImageUrl,
+      authProvider: user.authProvider,
+    };
   }
 
   generateAccessToken(userId: number): string {
