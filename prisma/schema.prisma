@@ -16,7 +16,7 @@ datasource db {
 model User {
   id              Int                @id @default(autoincrement())
   email           String             @unique
-  passwordHash    String?            // 구글 소셜 로그인 위주라 선택적
+  password    String?            // 구글 소셜 로그인 위주라 선택적
   name            String
   authProvider    String?
   profileImageUrl String?
