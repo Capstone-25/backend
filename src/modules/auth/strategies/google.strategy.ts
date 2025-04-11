@@ -29,7 +29,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     return {
       email: emails[0].value,
       name: displayName,
-      nickname: displayName.split(' ')[0], // 예시로 첫 단어를 닉네임으로 설정
       profile_url: photos[0]?.value || null,
       auth_provider: 'google',
     };
