@@ -1,7 +1,6 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@src/prisma/prisma.service';
-import axios from 'axios';
 import { AuthUserDto } from './dto/auth-user.dto';
 import * as bcrypt from 'bcrypt';
 
@@ -12,49 +11,66 @@ export class AuthService {
     private readonly prisma: PrismaService
   ) {}
 
-  async handleGoogleCallback(code: string) {
-    try {
-      // Google 토큰 요청
-      const tokenResponse = await axios.post(
-        'https://oauth2.googleapis.com/token',
-        {
-          code,
-          client_id: process.env.GOOGLE_CLIENT_ID,
-          client_secret: process.env.GOOGLE_CLIENT_SECRET,
-          redirect_uri: process.env.GOOGLE_CALLBACK_DEPLOY_URL,
-          grant_type: 'authorization_code',
-        }
-      );
-      const { access_token } = tokenResponse.data;
-      // Google 사용자 정보 요청
-      const userInfoResponse = await axios.get(
-        'https://www.googleapis.com/oauth2/v2/userinfo',
-        {
-          headers: { Authorization: `Bearer ${access_token}` },
-        }
-      );
-
-      const userData = userInfoResponse.data;
-
-      const isExistingUser = await this.checkUserExist(userData.email);
-      const user = await this.findOrCreateUser({
-        email: userData.email,
-        name: userData.name,
-        profileImageUrl: userData.picture,
-        authProvider: 'google',
-      });
-
-      const accessToken = this.generateAccessToken(user.id);
-      const responseUser = this.filterUserFields(user);
-
-      return {
-        user: responseUser,
-        accessToken,
-        isExistingUser,
-      };
-    } catch (error) {
-      console.error(error);
+  // auth.service.ts
+  async handleGoogleCallback(
+    payload: AuthUserDto & {
+      googleAccessToken: string;
+      googleRefreshToken: string;
     }
+  ) {
+    const {
+      email,
+      name,
+      profileImageUrl,
+      authProvider,
+      googleAccessToken,
+      googleRefreshToken,
+    } = payload;
+
+    // 1) DB에서 유저 조회
+    let user = await this.prisma.user.findUnique({ where: { email } });
+
+    // 2) 없으면 생성, 있으면 토큰만 갱신
+    if (user) {
+      user = await this.prisma.user.update({
+        where: { id: user.id },
+        data: {
+          googleAccessToken,
+          googleRefreshToken,
+          googleTokenExpiry: new Date(Date.now() + 36000 * 1000 * 1000),
+          lastLogin: new Date(),
+        },
+      });
+    } else {
+      user = await this.prisma.user.create({
+        data: {
+          email,
+          name,
+          profileImageUrl,
+          authProvider,
+          googleAccessToken,
+          googleRefreshToken,
+          googleTokenExpiry: new Date(Date.now() + 36000 * 1000), // 1시간 후 만료
+          lastLogin: new Date(),
+        },
+      });
+    }
+
+    // 3) 우리 서비스 JWT 발급
+    const jwtPayload = { userId: user.id, email: user.email };
+    const accessToken = this.jwtService.sign(jwtPayload, { expiresIn: '1h' });
+    const refreshToken = this.jwtService.sign(jwtPayload, {
+      secret: process.env.REFRESH_TOKEN_SECRET,
+      expiresIn: '7d',
+    });
+    // 해시 저장
+    const hashed = await bcrypt.hash(refreshToken, 10);
+    await this.prisma.user.update({
+      where: { id: user.id },
+      data: { currentHashedRefreshToken: hashed },
+    });
+
+    return { user, accessToken, refreshToken };
   }
 
   // 회원가입 로직
@@ -105,11 +121,14 @@ export class AuthService {
       accessToken,
     };
   }
-  private async checkUserExist(email: string): Promise<boolean> {
-    const user = await this.prisma.user.findUnique({
-      where: { email },
+
+  async logout(userId: number) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: {
+        currentHashedRefreshToken: null,
+      },
     });
-    return !!user;
   }
 
   private filterUserFields(user: any) {
