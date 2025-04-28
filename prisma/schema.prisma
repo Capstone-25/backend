@@ -1,9 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -14,28 +8,30 @@ datasource db {
 }
 
 model User {
-  id              Int                @id @default(autoincrement())
-  email           String             @unique
-  password    String?            // 구글 소셜 로그인 위주라 선택적
-  name            String
-  authProvider    String?
-  profileImageUrl String?
-  ageGroup        String?
-  gender          String?
-  createdAt       DateTime           @default(now())
-  lastLogin       DateTime?
-
-  // Relations
-  emotionLogs     EmotionLog[]
-  journals        Journal[]
-  goals           Goal[]
-  chatSessions    ChatSession[]
-  actionMissions  ActionMission[]
-  contentUsages   ContentUsage[]
-  emotionAnalyses EmotionAnalysis[]
-  userInterests   UserInterest[]
-  notifications   Notification[]
-  calendarEvents  CalendarEvent[]
+  id                        Int               @id @default(autoincrement())
+  email                     String            @unique
+  name                      String
+  profileImageUrl           String?
+  ageGroup                  String?
+  gender                    String?
+  createdAt                 DateTime          @default(now())
+  lastLogin                 DateTime?
+  authProvider              String?
+  password                  String?
+  currentHashedRefreshToken String?
+  googleAccessToken         String?
+  googleRefreshToken        String?
+  googleTokenExpiry         DateTime?
+  actionMissions            ActionMission[]
+  calendarEvents            CalendarEvent[]
+  chatSessions              ChatSession[]
+  contentUsages             ContentUsage[]
+  emotionAnalyses           EmotionAnalysis[]
+  emotionLogs               EmotionLog[]
+  goals                     Goal[]
+  journals                  Journal[]
+  notifications             Notification[]
+  userInterests             UserInterest[]
 }
 
 model EmotionLog {
@@ -47,62 +43,63 @@ model EmotionLog {
   notes          String?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @default(now()) @updatedAt
+  user           User      @relation(fields: [userId], references: [id])
+  journals       Journal[]
 
-  // Relations
-  user     User    @relation(fields: [userId], references: [id])
-  journals Journal[]
+  @@index([userId], map: "EmotionLog_userId_fkey")
 }
 
 model Journal {
-  id           Int       @id @default(autoincrement())
+  id           Int                 @id @default(autoincrement())
   userId       Int
   title        String?
   content      String
   emotionLogId Int?
   date         DateTime
   tags         String?
-  isVoiceEntry Boolean   @default(false)
+  isVoiceEntry Boolean             @default(false)
   voiceUrl     String?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @default(now()) @updatedAt
+  createdAt    DateTime            @default(now())
+  updatedAt    DateTime            @default(now()) @updatedAt
+  emotionLog   EmotionLog?         @relation(fields: [emotionLogId], references: [id])
+  user         User                @relation(fields: [userId], references: [id])
+  attachments  JournalAttachment[]
 
-  // Relations
-  user       User         @relation(fields: [userId], references: [id])
-  emotionLog EmotionLog?  @relation(fields: [emotionLogId], references: [id])
-  attachments JournalAttachment[]
+  @@index([emotionLogId], map: "Journal_emotionLogId_fkey")
+  @@index([userId], map: "Journal_userId_fkey")
 }
 
 model JournalAttachment {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   journalId Int
   fileUrl   String
   fileType  String
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
+  journal   Journal  @relation(fields: [journalId], references: [id])
 
-  // Relation
-  journal Journal @relation(fields: [journalId], references: [id])
+  @@index([journalId], map: "JournalAttachment_journalId_fkey")
 }
 
 model Goal {
-  id           Int       @id @default(autoincrement())
+  id           Int             @id @default(autoincrement())
   userId       Int
   title        String
   description  String?
   category     String?
   targetValue  Int
   unit         String
-  currentValue Int       @default(0)
+  currentValue Int             @default(0)
   startDate    DateTime
   deadline     DateTime?
-  isCompleted  Boolean   @default(false)
+  isCompleted  Boolean         @default(false)
   completedAt  DateTime?
-  createdAt    DateTime  @default(now())
-  updatedAt    DateTime  @default(now()) @updatedAt
-
-  // Relations
-  user         User           @relation(fields: [userId], references: [id])
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @default(now()) @updatedAt
+  user         User            @relation(fields: [userId], references: [id])
   milestones   GoalMilestone[]
   progressLogs GoalProgress[]
+
+  @@index([userId], map: "Goal_userId_fkey")
 }
 
 model GoalMilestone {
@@ -112,67 +109,68 @@ model GoalMilestone {
   isCompleted Boolean   @default(false)
   completedAt DateTime?
   createdAt   DateTime  @default(now())
+  goal        Goal      @relation(fields: [goalId], references: [id])
 
-  // Relations
-  goal Goal @relation(fields: [goalId], references: [id])
+  @@index([goalId], map: "GoalMilestone_goalId_fkey")
 }
 
 model GoalProgress {
-  id        Int       @id @default(autoincrement())
+  id        Int      @id @default(autoincrement())
   goalId    Int
   value     Int
   date      DateTime
   notes     String?
-  createdAt DateTime  @default(now())
+  createdAt DateTime @default(now())
+  goal      Goal     @relation(fields: [goalId], references: [id])
 
-  // Relation
-  goal Goal @relation(fields: [goalId], references: [id])
+  @@index([goalId], map: "GoalProgress_goalId_fkey")
 }
 
 model ChatSession {
-  id        Int       @id @default(autoincrement())
+  id        Int           @id @default(autoincrement())
   userId    Int
   title     String?
-  persona   String    @default("supportive")
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @default(now()) @updatedAt
+  persona   String        @default("supportive")
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @default(now()) @updatedAt
+  messages  ChatMessage[]
+  user      User          @relation(fields: [userId], references: [id])
 
-  // Relations
-  user     User        @relation(fields: [userId], references: [id])
-  messages ChatMessage[]
+  @@index([userId], map: "ChatSession_userId_fkey")
 }
 
 model ChatMessage {
-  id         Int       @id @default(autoincrement())
-  sessionId  Int
-  sender     String
-  content    String
-  emotion    String?
-  timestamp  DateTime  @default(now())
-
-  // Relations
-  chatSession   ChatSession   @relation(fields: [sessionId], references: [id])
+  id             Int             @id @default(autoincrement())
+  sessionId      Int
+  sender         String
+  content        String
+  emotion        String?
+  timestamp      DateTime        @default(now())
   actionMissions ActionMission[]
+  chatSession    ChatSession     @relation(fields: [sessionId], references: [id])
+
+  @@index([sessionId], map: "ChatMessage_sessionId_fkey")
 }
 
 model ActionMission {
-  id            Int       @id @default(autoincrement())
+  id            Int          @id @default(autoincrement())
   userId        Int
   title         String
   description   String
   chatMessageId Int?
-  isCompleted   Boolean   @default(false)
+  isCompleted   Boolean      @default(false)
   completedAt   DateTime?
   deadline      DateTime?
-  createdAt     DateTime  @default(now())
+  createdAt     DateTime     @default(now())
+  chatMessage   ChatMessage? @relation(fields: [chatMessageId], references: [id])
+  user          User         @relation(fields: [userId], references: [id])
 
-  // Relations
-  user        User         @relation(fields: [userId], references: [id])
-  chatMessage ChatMessage? @relation(fields: [chatMessageId], references: [id])
+  @@index([chatMessageId], map: "ActionMission_chatMessageId_fkey")
+  @@index([userId], map: "ActionMission_userId_fkey")
 }
 
 model Content {
-  id           Int       @id @default(autoincrement())
+  id           Int            @id @default(autoincrement())
   title        String
   description  String?
   type         String
@@ -181,20 +179,17 @@ model Content {
   duration     Int?
   fileUrl      String
   thumbnailUrl String?
-  createdAt    DateTime  @default(now())
-
-  // Relations
-  contentTags ContentTag[]
-  usages      ContentUsage[]
+  createdAt    DateTime       @default(now())
+  contentTags  ContentTag[]
+  usages       ContentUsage[]
 }
 
 model ContentTag {
   contentId Int
   tag       String
+  content   Content @relation(fields: [contentId], references: [id])
 
   @@id([contentId, tag])
-  // Relation
-  content Content @relation(fields: [contentId], references: [id])
 }
 
 model ContentUsage {
@@ -205,62 +200,61 @@ model ContentUsage {
   completed   Boolean   @default(false)
   startedAt   DateTime  @default(now())
   completedAt DateTime?
+  content     Content   @relation(fields: [contentId], references: [id])
+  user        User      @relation(fields: [userId], references: [id])
 
-  // Relations
-  user    User    @relation(fields: [userId], references: [id])
-  content Content @relation(fields: [contentId], references: [id])
+  @@index([contentId], map: "ContentUsage_contentId_fkey")
+  @@index([userId], map: "ContentUsage_userId_fkey")
 }
 
 model EmotionAnalysis {
-  id           Int       @id @default(autoincrement())
+  id           Int      @id @default(autoincrement())
   userId       Int
   periodStart  DateTime
   periodEnd    DateTime
   analysisData Json
   insights     String?
-  createdAt    DateTime  @default(now())
+  createdAt    DateTime @default(now())
+  user         User     @relation(fields: [userId], references: [id])
 
-  // Relation
-  user User @relation(fields: [userId], references: [id])
+  @@index([userId], map: "EmotionAnalysis_userId_fkey")
 }
 
 model UserInterest {
   userId   Int
   interest String
+  user     User   @relation(fields: [userId], references: [id])
 
   @@id([userId, interest])
-  
-  // Relation
-  user User @relation(fields: [userId], references: [id])
 }
 
 model Notification {
-  id          Int       @id @default(autoincrement())
+  id          Int      @id @default(autoincrement())
   userId      Int
   title       String
   content     String
   type        String
   referenceId Int?
-  isRead      Boolean   @default(false)
-  createdAt   DateTime  @default(now())
+  isRead      Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  user        User     @relation(fields: [userId], references: [id])
 
-  // Relation
-  user User @relation(fields: [userId], references: [id])
+  @@index([userId], map: "Notification_userId_fkey")
 }
 
 model CalendarEvent {
-  id         Int       @id @default(autoincrement())
-  userId     Int
-  title      String
+  id          Int      @id @default(autoincrement())
+  userId      Int
+  title       String
   description String?
-  startTime  DateTime
-  endTime    DateTime
-  location   String?
-  category   String?
-  emotion    String?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @default(now()) @updatedAt
+  startTime   DateTime
+  endTime     DateTime
+  location    String?
+  category    String?
+  emotion     String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @default(now()) @updatedAt
+  user        User     @relation(fields: [userId], references: [id])
 
-  // Relation
-  user User @relation(fields: [userId], references: [id])
+  @@index([userId], map: "CalendarEvent_userId_fkey")
 }
