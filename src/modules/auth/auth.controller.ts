@@ -32,12 +32,9 @@ export class AuthController {
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   async googleCallback(@Req() req, @Res({ passthrough: true }) res: Response) {
-    // req.user에 strategy.validate()에서 넘긴 payload가 들어있음
     const { user, accessToken, refreshToken } =
       await this.authService.handleGoogleCallback(req.user);
-
-    // 리프레시 토큰은 HTTP-only 쿠키로 설정
-    res.cookie('refresh_token', refreshToken, {
+    res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/auth/refresh',
