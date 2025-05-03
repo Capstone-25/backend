@@ -12,7 +12,6 @@ model User {
   email                     String            @unique
   name                      String
   profileImageUrl           String?
-  ageGroup                  String?
   gender                    String?
   createdAt                 DateTime          @default(now())
   lastLogin                 DateTime?
@@ -22,6 +21,7 @@ model User {
   googleAccessToken         String?
   googleRefreshToken        String?
   googleTokenExpiry         DateTime?
+  age                       Int?
   actionMissions            ActionMission[]
   calendarEvents            CalendarEvent[]
   chatSessions              ChatSession[]
@@ -243,18 +243,19 @@ model Notification {
 }
 
 model CalendarEvent {
-  id          Int      @id @default(autoincrement())
-  userId      Int
-  title       String
-  description String?
-  startTime   DateTime
-  endTime     DateTime
-  location    String?
-  category    String?
-  emotion     String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @default(now()) @updatedAt
-  user        User     @relation(fields: [userId], references: [id])
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  title         String
+  description   String?
+  location      String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @default(now()) @updatedAt
+  endDate       DateTime
+  googleEventId String   @unique
+  isAllDay      Boolean  @default(false)
+  lastSynced    DateTime @default(now())
+  startDate     DateTime
+  user          User     @relation(fields: [userId], references: [id])
 
   @@index([userId], map: "CalendarEvent_userId_fkey")
 }
