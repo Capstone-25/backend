@@ -27,18 +27,18 @@ export class ChatService {
   }
 
   // 7. 채팅방 메시지 조회
-  async getChatMessages(sessionId: number): Promise<ChatMessageDTO[]> {
+  async getChatMessages(chatId: number): Promise<ChatMessageDTO[]> {
     const messages = await this.prisma.chatMessage.findMany({
-      where: { sessionId },
+      where: { sessionId: chatId },
       orderBy: { timestamp: 'asc' },
     });
 
     return messages.map(message => ({
       id: message.id,
-      sessionId: message.sessionId,
-      sender: message.sender,
-      content: message.content,
-      timestamp: message.timestamp,
+      chatId: message.sessionId,
+      userId: message.sender === 'user' ? 1 : 0, // 임시로 사용자 ID 설정
+      message: message.content,
+      createdAt: message.timestamp,
     }));
   }
 
