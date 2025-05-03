@@ -15,6 +15,10 @@ import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@src/prisma/prisma.service';
 import * as bcrypt from 'bcrypt';
+import { ApiTags } from '@nestjs/swagger';
+import { AuthSwagger } from './swagger/auth.swagger';
+
+@ApiTags('Auth')
 @Controller('auth')
 export class AuthController {
   constructor(
@@ -25,6 +29,7 @@ export class AuthController {
 
   @Get('google')
   @UseGuards(AuthGuard('google'))
+  @AuthSwagger.googleLogin.operation
   async googleLogin() {
     //구글 로그인 요청
   }
@@ -47,16 +52,19 @@ export class AuthController {
 
   @Post('logout')
   @UseGuards(JwtAuthGuard)
+  @AuthSwagger.logout.operation
+  @AuthSwagger.logout.response
   async logout(@Req() req: any, @Res({ passthrough: true }) res: Response) {
     const userId = req.user.userId;
-    // 1) DB에서 리프레시 토큰 등 제거
     await this.authService.logout(userId);
-    // 2) HTTP-only 쿠키 삭제
     res.clearCookie('refresh_token', { path: '/auth/refresh' });
     return { message: '로그아웃 성공' };
   }
 
   @Post('signup')
+  @AuthSwagger.signup.operation
+  @AuthSwagger.signup.body
+  @AuthSwagger.signup.response
   async signup(
     @Body() body: { email: string; name: string; password: string }
   ) {
@@ -72,6 +80,9 @@ export class AuthController {
   }
 
   @Post('login')
+  @AuthSwagger.login.operation
+  @AuthSwagger.login.body
+  @AuthSwagger.login.response
   async login(@Body() body: { email: string; password: string }) {
     const result = await this.authService.login(body.email, body.password);
     return {
@@ -81,8 +92,9 @@ export class AuthController {
     };
   }
 
-  // Optional: 내부 JWT 재발급 엔드포인트
   @Post('refresh')
+  @AuthSwagger.refresh.operation
+  @AuthSwagger.refresh.response
   async refresh(@Req() req, @Res({ passthrough: true }) res: Response) {
     const token = req.cookies['refresh_token'];
     const payload = this.jwtService.verify(token, {
@@ -91,14 +103,12 @@ export class AuthController {
     const user = await this.prisma.user.findUnique({
       where: { id: payload.userId },
     });
-    // 해시 검증…
     if (
       !user?.currentHashedRefreshToken ||
       !(await bcrypt.compare(token, user.currentHashedRefreshToken))
     ) {
       throw new UnauthorizedException();
     }
-    // 새로운 액세스 토큰 발급
     const newAccessToken = this.jwtService.sign(
       { userId: user.id, email: user.email },
       { expiresIn: '1h' }
