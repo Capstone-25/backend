@@ -31,12 +31,19 @@ export class ChatService {
     const messages = await this.prisma.chatMessage.findMany({
       where: { sessionId: chatId },
       orderBy: { timestamp: 'asc' },
+      include: {
+        chatSession: {
+          select: {
+            userId: true,
+          },
+        },
+      },
     });
 
     return messages.map(message => ({
       id: message.id,
       chatId: message.sessionId,
-      userId: message.sender === 'user' ? 1 : 0, // 임시로 사용자 ID 설정
+      userId: message.sender === 'user' ? message.chatSession.userId : 0, // 봇은 0, 사용자는 실제 userId
       message: message.content,
       createdAt: message.timestamp,
     }));
