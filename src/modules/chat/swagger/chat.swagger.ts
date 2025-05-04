@@ -1,9 +1,9 @@
 import { ApiOperation, ApiResponse, ApiTags, ApiParam, ApiBody } from '@nestjs/swagger';
-import { CreateSessionDto } from '../dto/CreateSessionDTO';
+import { CreateSessionDto } from '../dto/CreateSessionDto';
 import { SendMessageDto } from '../dto/SendMessageDto';
-import { ChangePersonaDto } from '../dto/ChangePersonaDTO';
-import { ChatResponseDTO } from '../dto/ChatResponseDTO';
-import { ChatMessageDTO } from '../dto/ChatMessageDTO';
+import { ChangePersonaDto } from '../dto/ChangePersonaDto';
+import { ChatResponseDto } from '../dto/ChatResponseDto';
+import { ChatMessageDto } from '../dto/ChatMessageDto';
 
 export const ChatSwagger = {
   createSession: {
@@ -55,7 +55,7 @@ export const ChatSwagger = {
     response: ApiResponse({
       status: 200,
       description: '메시지 조회 성공',
-      type: [ChatMessageDTO],
+      type: [ChatMessageDto],
     }),
   },
 
@@ -76,7 +76,7 @@ export const ChatSwagger = {
     response: ApiResponse({
       status: 201,
       description: '메시지 전송 및 AI 응답 수신 성공',
-      type: ChatResponseDTO,
+      type: ChatResponseDto,
     }),
   },
 

@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 
-export class ChatResponseDTO {
+export class ChatResponseDto {
   @ApiProperty({
     description: '사용자 ID',
     example: 1,

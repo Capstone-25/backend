@@ -11,11 +11,11 @@ import {
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { JwtAuthGuard } from '@src/modules/auth/guards/jwt-auth.guard';
-import { CreateSessionDto } from './dto/CreateSessionDTO';
+import { CreateSessionDto } from './dto/CreateSessionDto';
 import { SendMessageDto } from './dto/SendMessageDto';
-import { ChangePersonaDto } from './dto/ChangePersonaDTO';
-import { ChatResponseDTO } from './dto/ChatResponseDTO';
-import { ChatMessageDTO } from './dto/ChatMessageDTO';
+import { ChangePersonaDto } from './dto/ChangePersonaDto';
+import { ChatResponseDto } from './dto/ChatResponseDto';
+import { ChatMessageDto } from './dto/ChatMessageDto';
 import { ApiTags } from '@nestjs/swagger';
 import { ChatSwagger } from './swagger/chat.swagger';
 
@@ -48,7 +48,7 @@ export class ChatController {
   @ChatSwagger.getChatMessages.response
   async getChatMessages(
     @Param('sessionId') id: string
-  ): Promise<ChatMessageDTO[]> {
+  ): Promise<ChatMessageDto[]> {
     return this.chatService.getChatMessages(+id);
   }
 
@@ -62,7 +62,7 @@ export class ChatController {
     @Req() req,
     @Param('sessionId') id: string,
     @Body() dto: SendMessageDto
-  ): Promise<ChatResponseDTO> {
+  ): Promise<ChatResponseDto> {
     return this.chatService.sendMessage(req.user, +id, dto.message);
   }
 

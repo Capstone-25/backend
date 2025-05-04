@@ -3,8 +3,8 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/prisma/prisma.service';
 import axios from 'axios';
 import { HttpService } from '@nestjs/axios';
-import { ChatResponseDTO } from './dto/ChatResponseDTO';
-import { ChatMessageDTO } from './dto/ChatMessageDTO';
+import { ChatResponseDto } from './dto/ChatResponseDto';
+import { ChatMessageDto } from './dto/ChatMessageDto';
 // 구글핏
 @Injectable()
 export class ChatService {
@@ -27,7 +27,7 @@ export class ChatService {
   }
 
   // 7. 채팅방 메시지 조회
-  async getChatMessages(chatId: number): Promise<ChatMessageDTO[]> {
+  async getChatMessages(chatId: number): Promise<ChatMessageDto[]> {
     const messages = await this.prisma.chatMessage.findMany({
       where: { sessionId: chatId },
       orderBy: { timestamp: 'asc' },
@@ -54,7 +54,7 @@ export class ChatService {
     user: any,
     sessionId: number,
     message: string
-  ): Promise<ChatResponseDTO> {
+  ): Promise<ChatResponseDto> {
     const session = await this.prisma.chatSession.findUnique({
       where: { id: sessionId },
     });
