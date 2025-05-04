@@ -4,6 +4,10 @@ import { AuthModule } from './modules/auth/auth.module';
 import { CalendarModule } from './modules/calendar/calendar.module';
 import { ChatModule } from './modules/chat/chat.module';
 import { UserModule } from './modules/users/user.module';
+import { FirebaseModule } from '@src/config/firebase.module';
+import { NotificationModule } from '@src/modules/notification/notification.module';
+import { SchedulerModule } from '@src/modules/scheduler/scheduler.module';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -13,6 +17,9 @@ import { UserModule } from './modules/users/user.module';
     CalendarModule,
     ChatModule,
     UserModule,
+    FirebaseModule,
+    NotificationModule,
+    SchedulerModule,
   ],
 })
 export class AppModule {}
