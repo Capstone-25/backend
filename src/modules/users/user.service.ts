@@ -55,4 +55,11 @@ export class UserService {
     //   },
     // });
   }
+
+  async updateFcmToken(userId: number, token: string) {
+    await this.prisma.user.update({
+      where: { id: userId },
+      data: { fcmToken: token },
+    });
+  }
 }
