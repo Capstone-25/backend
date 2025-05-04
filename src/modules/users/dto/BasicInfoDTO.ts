@@ -4,13 +4,12 @@ import { IsEnum, IsInt, IsNotEmpty, Min } from 'class-validator';
 export enum Gender {
   MALE = 'male',
   FEMALE = 'female',
-  OTHER = 'other',
 }
 
 export class BasicInfoDTO {
   @ApiProperty({
     enum: Gender,
-    description: '성별 (male, female, other)',
+    description: '성별 (male, female)',
     example: 'male',
   })
   @IsEnum(Gender)
