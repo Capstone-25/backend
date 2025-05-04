@@ -23,6 +23,8 @@
       "@common/*": ["src/common/*"], // common alias
       "@config/*": ["src/config/*"], // config alias
       "@prisma/*": ["src/prisma/*"] // prisma alias
-    }
+    },
+    "resolveJsonModule": true,
+    "esModuleInterop": true
   }
 }
