@@ -32,6 +32,8 @@ model User {
   journals                  Journal[]
   notifications             Notification[]
   userInterests             UserInterest[]
+  fcmToken                  String?         @unique
+  notificationSchedules     NotificationSchedule[]
 }
 
 model EmotionLog {
@@ -256,6 +258,22 @@ model CalendarEvent {
   lastSynced    DateTime @default(now())
   startDate     DateTime
   user          User     @relation(fields: [userId], references: [id])
+  notificationSchedules NotificationSchedule[]
 
   @@index([userId], map: "CalendarEvent_userId_fkey")
+}
+
+model NotificationSchedule {
+  id            Int      @id @default(autoincrement())
+  eventId       Int
+  userId        Int
+  scheduledTime DateTime
+  title         String
+  body          String
+  isSent        Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  user          User     @relation(fields: [userId], references: [id])
+  event         CalendarEvent @relation(fields: [eventId], references: [id])
 }
