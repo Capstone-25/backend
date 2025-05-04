@@ -7,7 +7,7 @@ import { NotificationService } from '../notification/notification.service';
 export class SchedulerService implements OnModuleInit {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly notificationService: NotificationService,
+    private readonly notificationService: NotificationService
   ) {}
 
   @Cron(CronExpression.EVERY_MINUTE)
@@ -27,7 +27,7 @@ export class SchedulerService implements OnModuleInit {
         await this.notificationService.sendPushNotification(
           notification.userId,
           notification.title,
-          notification.body,
+          notification.body
         );
 
         // 알림 전송 완료 표시
@@ -40,4 +40,8 @@ export class SchedulerService implements OnModuleInit {
       }
     }
   }
-} 
+
+  onModuleInit() {
+    // 초기화 시 필요한 작업이 있으면 여기에 작성
+  }
+}

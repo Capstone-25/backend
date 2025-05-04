@@ -53,38 +53,38 @@ export class CalendarService {
 
   private async saveEventsToDB(userId: number, events: any[]) {
     for (const event of events) {
-      const startDate = event.start.dateTime || event.start.date;
-      const endDate = event.end.dateTime || event.end.date;
+      const eventData = {
+        eventId: event.id,
+        summary: event.summary,
+        description: event.description,
+        startTime: new Date(event.start.dateTime || event.start.date),
+        endTime: new Date(event.end.dateTime || event.end.date),
+        location: event.location,
+        userId: userId,
+      };
 
       await this.prisma.calendarEvent.upsert({
-        where: {
-          googleEventId: event.id,
-        },
+        where: { eventId: event.id },
         update: {
-          title: event.summary,
-          description: event.description,
-          startDate: new Date(startDate),
-          endDate: new Date(endDate),
-          location: event.location,
-          isAllDay: !event.start.dateTime,
-          lastSynced: new Date(),
+          summary: eventData.summary,
+          description: eventData.description,
+          startTime: eventData.startTime,
+          endTime: eventData.endTime,
+          location: eventData.location,
         },
-        create: {
-          userId,
-          googleEventId: event.id,
-          title: event.summary,
-          description: event.description,
-          startDate: new Date(startDate),
-          endDate: new Date(endDate),
-          location: event.location,
-          isAllDay: !event.start.dateTime,
-          lastSynced: new Date(),
-        },
+        create: eventData,
       });
     }
   }
 
-  private async refreshGoogleToken(userId: number) {
+  private async refreshGoogleToken(userId: number, retryCount = 0) {
+    if (retryCount >= 3) {
+      throw new HttpException(
+        '최대 재시도 횟수 초과',
+        HttpStatus.TOO_MANY_REQUESTS
+      );
+    }
+
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
     });
@@ -105,14 +105,16 @@ export class CalendarService {
       oauth2Client.setCredentials({
         refresh_token: user.googleRefreshToken,
       });
-      const { token } = await oauth2Client.getAccessToken();
+      const { credentials } = await oauth2Client.refreshAccessToken();
 
       await this.prisma.user.update({
         where: { id: userId },
         data: {
-          googleAccessToken: token,
+          googleAccessToken: credentials.access_token,
+          googleRefreshToken:
+            credentials.refresh_token || user.googleRefreshToken,
           googleTokenExpiry: new Date(
-            Date.now() + 3600000 // 1시간
+            Date.now() + (credentials.expiry_date || 3600 * 1000)
           ),
         },
       });

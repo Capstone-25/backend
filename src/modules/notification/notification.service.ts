@@ -33,13 +33,24 @@ export class NotificationService {
     // 1. 이벤트 정보 조회
     const event = await this.prisma.calendarEvent.findUnique({
       where: { id: eventId },
-      include: { user: true },
+      select: {
+        id: true,
+        summary: true,
+        startTime: true,
+        userId: true,
+        user: {
+          select: {
+            id: true,
+            fcmToken: true,
+          },
+        },
+      },
     });
 
     if (!event) return;
 
     // 2. 24시간 전 시간 계산
-    const notificationTime = new Date(event.startDate);
+    const notificationTime = new Date(event.startTime);
     notificationTime.setHours(notificationTime.getHours() - 24);
 
     // 3. 알림 스케줄링
@@ -49,9 +60,9 @@ export class NotificationService {
         userId: event.userId,
         scheduledTime: notificationTime,
         title: '일정 알림',
-        body: `${event.title} 일정이 24시간 후에 시작됩니다.`,
+        body: `${event.summary} 일정이 24시간 후에 시작됩니다.`,
         isSent: false,
       },
     });
   }
-} 
+}

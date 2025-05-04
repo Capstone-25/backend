@@ -8,12 +8,12 @@ datasource db {
 }
 
 model User {
-  id                        Int               @id @default(autoincrement())
-  email                     String            @unique
+  id                        Int                    @id @default(autoincrement())
+  email                     String                 @unique
   name                      String
   profileImageUrl           String?
   gender                    String?
-  createdAt                 DateTime          @default(now())
+  createdAt                 DateTime               @default(now())
   lastLogin                 DateTime?
   authProvider              String?
   password                  String?
@@ -22,6 +22,7 @@ model User {
   googleRefreshToken        String?
   googleTokenExpiry         DateTime?
   age                       Int?
+  fcmToken                  String?                @unique
   actionMissions            ActionMission[]
   calendarEvents            CalendarEvent[]
   chatSessions              ChatSession[]
@@ -31,9 +32,8 @@ model User {
   goals                     Goal[]
   journals                  Journal[]
   notifications             Notification[]
-  userInterests             UserInterest[]
-  fcmToken                  String?         @unique
   notificationSchedules     NotificationSchedule[]
+  userInterests             UserInterest[]
 }
 
 model EmotionLog {
@@ -245,35 +245,36 @@ model Notification {
 }
 
 model CalendarEvent {
-  id            Int      @id @default(autoincrement())
-  userId        Int
-  title         String
-  description   String?
-  location      String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @default(now()) @updatedAt
-  endDate       DateTime
-  googleEventId String   @unique
-  isAllDay      Boolean  @default(false)
-  lastSynced    DateTime @default(now())
-  startDate     DateTime
-  user          User     @relation(fields: [userId], references: [id])
+  userId                Int
+  description           String?
+  location              String?
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  endTime               DateTime
+  eventId               String                 @unique
+  startTime             DateTime
+  summary               String
+  id                    Int                    @id @default(autoincrement())
+  user                  User                   @relation(fields: [userId], references: [id])
   notificationSchedules NotificationSchedule[]
 
-  @@index([userId], map: "CalendarEvent_userId_fkey")
+  @@index([userId])
+  @@index([eventId])
 }
 
 model NotificationSchedule {
-  id            Int      @id @default(autoincrement())
+  id            Int           @id @default(autoincrement())
   eventId       Int
   userId        Int
   scheduledTime DateTime
   title         String
   body          String
-  isSent        Boolean  @default(false)
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
-
-  user          User     @relation(fields: [userId], references: [id])
+  isSent        Boolean       @default(false)
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
   event         CalendarEvent @relation(fields: [eventId], references: [id])
+  user          User          @relation(fields: [userId], references: [id])
+
+  @@index([eventId], map: "NotificationSchedule_eventId_fkey")
+  @@index([userId], map: "NotificationSchedule_userId_fkey")
 }
