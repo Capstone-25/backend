@@ -29,7 +29,8 @@ export class CalendarService {
       const response = await calendar.events.list({
         calendarId: 'primary',
         timeMin: new Date().toISOString(),
-        maxResults: 10,
+        timeMax: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30일 후까지
+        maxResults: 50,
         singleEvents: true,
         orderBy: 'startTime',
       });
@@ -113,9 +114,7 @@ export class CalendarService {
           googleAccessToken: credentials.access_token,
           googleRefreshToken:
             credentials.refresh_token || user.googleRefreshToken,
-          googleTokenExpiry: new Date(
-            Date.now() + (credentials.expiry_date || 3600 * 1000)
-          ),
+          googleTokenExpiry: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
         },
       });
     } catch (error) {

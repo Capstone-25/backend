@@ -36,7 +36,7 @@ export class AuthService {
         data: {
           googleAccessToken,
           googleRefreshToken,
-          googleTokenExpiry: new Date(Date.now() + 36000 * 1000 * 1000),
+          googleTokenExpiry: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15일 후 만료
           lastLogin: new Date(),
         },
       });
@@ -49,7 +49,7 @@ export class AuthService {
           authProvider,
           googleAccessToken,
           googleRefreshToken,
-          googleTokenExpiry: new Date(Date.now() + 36000 * 1000), // 1시간 후 만료
+          googleTokenExpiry: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000), // 15일 후 만료
           lastLogin: new Date(),
         },
       });
