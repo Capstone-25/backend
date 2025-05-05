@@ -35,6 +35,8 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
+  @AuthSwagger.googleCallback.operation
+  @AuthSwagger.googleCallback.response
   async googleCallback(@Req() req, @Res() res: Response) {
     const { accessToken } = await this.authService.handleGoogleCallback(
       req.user

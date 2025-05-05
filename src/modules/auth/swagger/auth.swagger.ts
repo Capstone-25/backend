@@ -8,6 +8,27 @@ export const AuthSwagger = {
     }),
   },
 
+  googleCallback: {
+    operation: ApiOperation({
+      summary: '구글 로그인 콜백',
+      description:
+        '구글 OAuth 인증 후 accessToken을 쿼리스트링으로 프론트엔드에 전달합니다.',
+    }),
+    response: ApiResponse({
+      status: 302,
+      description: 'accessToken을 쿼리스트링으로 프론트엔드에 리디렉션',
+      schema: {
+        type: 'object',
+        properties: {
+          accessToken: {
+            type: 'string',
+            example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
+          },
+        },
+      },
+    }),
+  },
+
   logout: {
     operation: ApiOperation({
       summary: '로그아웃',
@@ -58,4 +79,4 @@ export const AuthSwagger = {
     }),
     response: ApiResponse({ status: 200, description: '토큰 갱신 성공' }),
   },
-}; 
+};

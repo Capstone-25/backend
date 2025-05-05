@@ -46,4 +46,50 @@ export const CalendarSwagger = {
       },
     }),
   },
+  syncCalendar: {
+    operation: ApiOperation({
+      summary: '구글 캘린더 연동(동기화)',
+      description:
+        '구글 캘린더에서 이벤트를 동기화하여 DB에 저장하고 반환합니다.',
+    }),
+    response: ApiResponse({
+      status: 200,
+      description: '구글 캘린더 연동 성공',
+      schema: {
+        type: 'object',
+        properties: {
+          message: { type: 'string', example: '구글 캘린더 연동 성공' },
+          events: {
+            type: 'array',
+            items: {
+              type: 'object',
+              properties: {
+                id: { type: 'string', example: 'event123' },
+                summary: { type: 'string', example: '회의' },
+                description: { type: 'string', example: '주간 회의' },
+                start: {
+                  type: 'object',
+                  properties: {
+                    dateTime: {
+                      type: 'string',
+                      example: '2024-05-03T10:00:00+09:00',
+                    },
+                  },
+                },
+                end: {
+                  type: 'object',
+                  properties: {
+                    dateTime: {
+                      type: 'string',
+                      example: '2024-05-03T11:00:00+09:00',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }),
+  },
 };
