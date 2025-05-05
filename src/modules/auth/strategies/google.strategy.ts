@@ -9,7 +9,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     super({
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: process.env.GOOGLE_CALLBACK_DEPLOY_URL,
+      callbackURL: 'http://localhost:8080/auth/google/callback',
       scope: ['email', 'profile', 'https://www.googleapis.com/auth/calendar'],
       accessType: 'offline', // refresh token 발급 받기 위해필수
       prompt: 'consent',

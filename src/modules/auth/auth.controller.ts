@@ -36,18 +36,18 @@ export class AuthController {
 
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
-  async googleCallback(@Req() req, @Res({ passthrough: true }) res: Response) {
-    const { user, accessToken, refreshToken } =
-      await this.authService.handleGoogleCallback(req.user);
+  async googleCallback(@Req() req, @Res() res: Response) {
+    const { refreshToken } = await this.authService.handleGoogleCallback(
+      req.user
+    );
     res.cookie('refreshToken', refreshToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       path: '/auth/refresh',
       maxAge: 7 * 24 * 60 * 60 * 1000, // 7일
     });
-
-    // 클라이언트에 액세스 토큰과 유저 정보 반환
-    return res.send({ message: '로그인 성공', user, accessToken });
+    // 로그인 성공 후 프론트엔드 메인페이지로 리디렉션
+    return res.redirect('http://localhost:5173/');
   }
 
   @Post('logout')
