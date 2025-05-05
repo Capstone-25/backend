@@ -125,4 +125,11 @@ export class CalendarService {
       );
     }
   }
+
+  async getDbCalendarEvents(userId: number) {
+    return this.prisma.calendarEvent.findMany({
+      where: { userId },
+      orderBy: { startTime: 'asc' },
+    });
+  }
 }
