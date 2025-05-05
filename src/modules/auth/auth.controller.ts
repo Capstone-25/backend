@@ -10,7 +10,6 @@ import {
 } from '@nestjs/common';
 import { AuthGuard } from '@nestjs/passport';
 import { Response } from 'express';
-import { JwtAuthGuard } from '@src/modules/auth/guards/jwt-auth.guard';
 import { AuthService } from './auth.service';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@src/prisma/prisma.service';
@@ -44,17 +43,6 @@ export class AuthController {
     return res.redirect(
       `http://localhost:5173/auth/google/callback?accessToken=${accessToken}`
     );
-  }
-
-  @Post('logout')
-  @UseGuards(JwtAuthGuard)
-  @AuthSwagger.logout.operation
-  @AuthSwagger.logout.response
-  async logout(@Req() req: any, @Res({ passthrough: true }) res: Response) {
-    const userId = req.user.userId;
-    await this.authService.logout(userId);
-    res.clearCookie('refresh_token', { path: '/auth/refresh' });
-    return { message: '로그아웃 성공' };
   }
 
   @Post('signup')

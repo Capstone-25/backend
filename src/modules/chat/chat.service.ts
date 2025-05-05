@@ -72,7 +72,7 @@ export class ChatService {
     });
 
     // 1-2. AI 서버에 전송 및 응답 받기
-    const response = await axios.post(`${this.aiServer}/chat/send`, {
+    const response = await axios.post(`${this.aiServer}/start_chat`, {
       userId: user.userId,
       chatId: sessionId,
       persona: session.persona,

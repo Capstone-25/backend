@@ -114,11 +114,6 @@ export class AuthService {
     };
   }
 
-  async logout(userId: number) {
-    // 로그아웃 시 별도 토큰 무효화 로직 없음 (단순화)
-    return;
-  }
-
   private filterUserFields(user: any) {
     return {
       userId: user.id,
