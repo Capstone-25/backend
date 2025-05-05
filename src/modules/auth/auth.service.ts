@@ -2,7 +2,6 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from '@src/prisma/prisma.service';
 import { AuthUserDto } from './dto/auth-user.dto';
-import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
@@ -56,21 +55,14 @@ export class AuthService {
       });
     }
 
-    // 3) 우리 서비스 JWT 발급
+    // 3) 우리 서비스 JWT 발급 (7일짜리)
     const jwtPayload = { userId: user.id, email: user.email };
-    const accessToken = this.jwtService.sign(jwtPayload, { expiresIn: '1h' });
-    const refreshToken = this.jwtService.sign(jwtPayload, {
-      secret: process.env.REFRESH_TOKEN_SECRET,
+    const accessToken = this.jwtService.sign(jwtPayload, {
       expiresIn: '7d',
-    });
-    // 해시 저장
-    const hashed = await bcrypt.hash(refreshToken, 10);
-    await this.prisma.user.update({
-      where: { id: user.id },
-      data: { currentHashedRefreshToken: hashed },
+      secret: process.env.ACCESS_TOKEN_SECRET,
     });
 
-    return { user, accessToken, refreshToken };
+    return { user, accessToken };
   }
 
   // 회원가입 로직
@@ -113,7 +105,7 @@ export class AuthService {
       );
     }
 
-    // 액세스 토큰 및 리프레시 토큰 생성
+    // 액세스 토큰 생성
     const accessToken = this.generateAccessToken(user.id);
     const responseUser = this.filterUserFields(user);
     return {
@@ -123,12 +115,8 @@ export class AuthService {
   }
 
   async logout(userId: number) {
-    await this.prisma.user.update({
-      where: { id: userId },
-      data: {
-        currentHashedRefreshToken: null,
-      },
-    });
+    // 로그아웃 시 별도 토큰 무효화 로직 없음 (단순화)
+    return;
   }
 
   private filterUserFields(user: any) {

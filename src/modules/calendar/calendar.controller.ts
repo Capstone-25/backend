@@ -1,4 +1,4 @@
-import { Controller, Get, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, UseGuards, Req, Post } from '@nestjs/common';
 import { JwtAuthGuard } from '@src/modules/auth/guards/jwt-auth.guard';
 import { CalendarService } from './calendar.service';
 import { ApiTags } from '@nestjs/swagger';
@@ -18,6 +18,18 @@ export class CalendarController {
     const events = await this.calendarService.getCalendarEvents(userId);
     return {
       message: '캘린더 이벤트 조회 성공',
+      events,
+    };
+  }
+
+  @Post('sync')
+  @UseGuards(JwtAuthGuard)
+  async syncGoogleCalendar(@Req() req) {
+    const userId = req.user.userId;
+    console.log(userId);
+    const events = await this.calendarService.getCalendarEvents(userId);
+    return {
+      message: '구글 캘린더 연동 성공',
       events,
     };
   }

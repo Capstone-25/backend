@@ -7,4 +7,4 @@ import { NotificationModule } from '../notification/notification.module';
   imports: [PrismaModule, NotificationModule],
   providers: [SchedulerService],
 })
-export class SchedulerModule {} 
+export class SchedulerModule {}
