@@ -22,9 +22,20 @@ export class NotificationService {
         title,
         body,
       },
-      data: {
-        type: 'calendar',
-        click_action: 'FLUTTER_NOTIFICATION_CLICK',
+      webpush: {
+        notification: {
+          icon: '/assets/icons/notification-icon.png',
+          badge: '/assets/icons/notification-badge.png',
+          actions: [
+            {
+              action: 'open',
+              title: '열기',
+            },
+          ],
+        },
+        fcmOptions: {
+          link: '/chat', // 알림 클릭시 이동할 URL
+        },
       },
     });
   }
