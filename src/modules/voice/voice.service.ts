@@ -9,7 +9,7 @@ export class VoiceService {
 
   async sendToAIServer(file: any, user: any, sessionId: number) {
     // AI 서버 주소
-    const aiServerUrl = process.env.AI_SERVER_URL;
+    const aiServerUrl = 'http://13.125.242.109:8000/voice_chat';
 
     // 사용자 정보 조회
     const userInfo = await this.prisma.user.findUnique({
