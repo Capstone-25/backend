@@ -50,7 +50,7 @@ export const onMessageListener = () => {
 // 서버에 토큰 저장
 const saveTokenToServer = async (token: string) => {
   try {
-    const response = await fetch('/api/fcm-token', {
+    const response = await fetch('/users/fcm-token', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
