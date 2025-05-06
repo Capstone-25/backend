@@ -6,23 +6,35 @@ import {
   Res,
   HttpException,
   HttpStatus,
+  UseGuards,
+  Req,
+  Param,
 } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { VoiceService } from './voice.service';
 import { Response } from 'express';
 import { Express } from 'express';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+
 @Controller('voice-chat')
 export class VoiceController {
   constructor(private readonly voiceService: VoiceService) {}
 
-  @Post()
+  @Post(':chatId')
+  @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   async handleVoiceChat(
     @UploadedFile() file: Express.Multer.File,
+    @Req() req,
+    @Param('chatId') chatId: string,
     @Res() res: Response
   ) {
     try {
-      const result = await this.voiceService.sendToAIServer(file);
+      const result = await this.voiceService.sendToAIServer(
+        file,
+        req.user,
+        parseInt(chatId)
+      );
       // result: { answerText: string, ttsAudioUrl: string }
       return res.json(result);
     } catch (e) {
