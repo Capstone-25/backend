@@ -7,6 +7,7 @@ import { UserModule } from './modules/users/user.module';
 import { FirebaseModule } from '@src/config/firebase.module';
 import { NotificationModule } from '@src/modules/notification/notification.module';
 import { SchedulerModule } from '@src/modules/scheduler/scheduler.module';
+import { VoiceModule } from './modules/voice/voice.module';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { SchedulerModule } from '@src/modules/scheduler/scheduler.module';
     FirebaseModule,
     NotificationModule,
     SchedulerModule,
+    VoiceModule,
   ],
 })
 export class AppModule {}
