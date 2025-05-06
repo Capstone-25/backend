@@ -76,9 +76,9 @@ export class ChatService {
       userId: user.userId,
       chatId: sessionId,
       persona: session.persona,
-      userName: userInfo.name,
-      userAge: userInfo.age,
-      userGender: userInfo.gender,
+      name: userInfo.name,
+      age: userInfo.age,
+      gender: userInfo.gender,
       message,
     });
 

@@ -20,20 +20,20 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 export class VoiceController {
   constructor(private readonly voiceService: VoiceService) {}
 
-  @Post(':chatId')
+  @Post(':sessionId')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   async handleVoiceChat(
     @UploadedFile() file: Express.Multer.File,
     @Req() req,
-    @Param('chatId') chatId: string,
+    @Param('sessionId') sessionId: string,
     @Res() res: Response
   ) {
     try {
       const result = await this.voiceService.sendToAIServer(
         file,
         req.user,
-        parseInt(chatId)
+        parseInt(sessionId)
       );
       // result: { answerText: string, ttsAudioUrl: string }
       return res.json(result);
