@@ -15,6 +15,7 @@ import { VoiceService } from './voice.service';
 import { Response } from 'express';
 import { Express } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { VoiceChatSwagger } from './swagger/voice.swagger';
 
 @Controller('voice-chat')
 export class VoiceController {
@@ -23,6 +24,7 @@ export class VoiceController {
   @Post(':sessionId')
   @UseGuards(JwtAuthGuard)
   @UseInterceptors(FileInterceptor('file'))
+  @VoiceChatSwagger()
   async handleVoiceChat(
     @UploadedFile() file: Express.Multer.File,
     @Req() req,
