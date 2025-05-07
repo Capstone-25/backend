@@ -1,19 +1,16 @@
 import {
   Controller,
   Post,
-  UploadedFile,
-  UseInterceptors,
   Res,
   HttpException,
   HttpStatus,
   UseGuards,
   Req,
   Param,
+  Body,
 } from '@nestjs/common';
-import { FileInterceptor } from '@nestjs/platform-express';
 import { VoiceService } from './voice.service';
 import { Response } from 'express';
-import { Express } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { VoiceChatSwagger } from './swagger/voice.swagger';
 
@@ -23,28 +20,25 @@ export class VoiceController {
 
   @Post(':sessionId')
   @UseGuards(JwtAuthGuard)
-  @UseInterceptors(FileInterceptor('file'))
   @VoiceChatSwagger()
   async handleVoiceChat(
-    @UploadedFile() file: Express.Multer.File,
-    @Req() req,
     @Param('sessionId') sessionId: string,
+    @Body() body: { message: string },
+    @Req() req,
     @Res() res: Response
   ) {
     try {
       const result = await this.voiceService.sendToAIServer(
-        file,
         req.user,
-        parseInt(sessionId)
+        Number(sessionId),
+        body.message
       );
-      // result: { answerText: string, ttsAudioUrl: string }
       return res.json(result);
-    } catch (e) {
+    } catch {
       throw new HttpException(
         'AI 서버 처리 실패',
         HttpStatus.INTERNAL_SERVER_ERROR
       );
-      console.log(e);
     }
   }
 }

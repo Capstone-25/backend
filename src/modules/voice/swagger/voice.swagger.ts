@@ -11,9 +11,10 @@ export const VoiceChatSwagger = () => {
   return applyDecorators(
     ApiOperation({
       summary: '음성 채팅',
-      description: '음성 파일을 AI 서버로 전송하고 응답을 받습니다.',
+      description:
+        '음성 텍스트(message)와 세션ID를 받아 AI 서버에 요청하고 응답을 반환합니다.',
     }),
-    ApiConsumes('multipart/form-data'),
+    ApiConsumes('application/json'),
     ApiParam({
       name: 'sessionId',
       type: 'number',
@@ -24,12 +25,13 @@ export const VoiceChatSwagger = () => {
       schema: {
         type: 'object',
         properties: {
-          file: {
+          message: {
             type: 'string',
-            format: 'binary',
-            description: '음성 파일 (wav, mp3 등)',
+            description: '음성 인식 결과 텍스트',
+            example: '안녕하세요',
           },
         },
+        required: ['message'],
       },
     }),
     ApiResponse({
