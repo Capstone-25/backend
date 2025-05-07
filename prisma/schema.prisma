@@ -281,10 +281,11 @@ model NotificationSchedule {
 }
 
 model SurveyCategory {
-  id      Int          @id @default(autoincrement())
-  name    String
-  code    String
-  surveys SurveyType[]
+  id          Int                @id @default(autoincrement())
+  name        String
+  code        String   @unique
+  surveyTypes SurveyType[]
+  assignments SurveyAssignment[]
 }
 
 model SurveyType {
@@ -293,9 +294,12 @@ model SurveyType {
   name        String
   description String?
   categoryId  Int
+  type        String
   questions   SurveyQuestion[]
   category    SurveyCategory   @relation(fields: [categoryId], references: [id])
   userSurveys UserSurvey[]
+  results     SurveyResult[]
+  assignments SurveyAssignment[]
 
   @@index([categoryId], map: "SurveyType_categoryId_fkey")
 }
@@ -325,4 +329,26 @@ model UserSurvey {
 
   @@index([surveyTypeId], map: "UserSurvey_surveyTypeId_fkey")
   @@index([userId], map: "UserSurvey_userId_fkey")
+}
+
+model SurveyResult {
+  id           Int        @id @default(autoincrement())
+  surveyTypeId Int
+  minScore     Int
+  maxScore     Int
+  label        String
+  description  String?
+  surveyType   SurveyType @relation(fields: [surveyTypeId], references: [id])
+
+  @@index([surveyTypeId])
+}
+
+model SurveyAssignment {
+  id           Int            @id @default(autoincrement())
+  categoryId   Int
+  ageGroup     String         // 'teen' | 'adult' | 'senior'
+  surveyTypeId Int
+
+  category     SurveyCategory @relation(fields: [categoryId], references: [id])
+  surveyType   SurveyType     @relation(fields: [surveyTypeId], references: [id])
 }
