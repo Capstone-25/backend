@@ -39,11 +39,27 @@ export const UserSwagger = {
   createSurvey: {
     operation: ApiOperation({
       summary: '기초 정보 입력',
-      description: '사용자의 성별과 나이를 입력합니다.',
+      description: '사용자의 성별, 나이, 고민유형(카테고리 코드)을 입력하면 맞춤형 심리검사 문항을 반환합니다.',
     }),
     response: ApiResponse({
       status: 200,
-      description: '기초 정보 입력 성공',
+      description: '기초 정보 입력 및 맞춤형 심리검사 문항 반환 성공',
+      schema: {
+        example: {
+          surveyType: 'PHQ-9',
+          questions: [
+            {
+              id: 1,
+              surveyTypeId: 1,
+              ageGroup: 'teen',
+              order: 1,
+              content: '흥미를 느끼거나 즐거움을 느끼는 일이 거의 없었다.',
+              isReverse: false,
+            },
+            // ...
+          ],
+        },
+      },
     }),
   },
 };
