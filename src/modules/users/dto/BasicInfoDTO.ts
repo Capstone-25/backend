@@ -25,4 +25,11 @@ export class BasicInfoDTO {
   @Min(1)
   @IsNotEmpty()
   age: number;
+
+  @ApiProperty({
+    description: '고민유형 카테고리 코드',
+    example: 'depression',
+  })
+  @IsNotEmpty()
+  categoryCode: string;
 }

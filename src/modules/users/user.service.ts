@@ -37,23 +37,34 @@ export class UserService {
   }
 
   async updateBasicInfo(userId: number, dto: BasicInfoDTO) {
-    return await this.prisma.user.update({
+    // 1. 사용자 정보 업데이트
+    await this.prisma.user.update({
       where: { id: userId },
       data: {
         gender: dto.gender,
         age: dto.age,
       },
     });
-  }
 
-  // TODO: Survey 모델이 추가되면 구현 예정
-  async createSurvey(userId: number, dto: any) {
-    // return await this.prisma.survey.create({
-    //   data: {
-    //     userId,
-    //     ...dto,
-    //   },
-    // });
+    // 2. 고민유형(카테고리 코드)에 맞는 surveyType 찾기
+    const surveyType = await this.prisma.surveyType.findFirst({
+      where: { category: { code: dto.categoryCode } },
+    });
+    if (!surveyType) throw new Error('해당 고민유형에 맞는 검사가 없습니다.');
+
+    // 3. 나이로 ageGroup 결정 (예: 10대: teen, 20대 이상: adult)
+    const ageGroup = dto.age < 20 ? 'teen' : 'adult';
+
+    // 4. 해당 surveyType과 ageGroup에 맞는 문항 반환
+    const questions = await this.prisma.surveyQuestion.findMany({
+      where: { surveyTypeId: surveyType.id, ageGroup },
+      orderBy: { order: 'asc' },
+    });
+
+    return {
+      surveyType: surveyType.code,
+      questions,
+    };
   }
 
   async updateFcmToken(userId: number, token: string) {
