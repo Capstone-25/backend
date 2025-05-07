@@ -6,7 +6,6 @@ import {
   Body,
   UseGuards,
   Post,
-  Req,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -14,7 +13,6 @@ import { GetUser } from '../auth/decorators/get-user.decorator';
 import { ChangeNameDTO } from './dto/ChangeNameDTO';
 import { UserSwagger } from './swagger/user.swagger';
 import { BasicInfoDTO } from './dto/BasicInfoDTO';
-import { Request } from 'express';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
