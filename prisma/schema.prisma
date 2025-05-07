@@ -34,6 +34,7 @@ model User {
   notifications             Notification[]
   notificationSchedules     NotificationSchedule[]
   userInterests             UserInterest[]
+  userSurveys               UserSurvey[]
 }
 
 model EmotionLog {
@@ -132,7 +133,7 @@ model ChatSession {
   id        Int           @id @default(autoincrement())
   userId    Int
   title     String?
-  persona   String        @default("supportive")
+  persona   String        @default("26살_한여름")
   createdAt DateTime      @default(now())
   updatedAt DateTime      @default(now()) @updatedAt
   messages  ChatMessage[]
@@ -277,4 +278,51 @@ model NotificationSchedule {
 
   @@index([eventId], map: "NotificationSchedule_eventId_fkey")
   @@index([userId], map: "NotificationSchedule_userId_fkey")
+}
+
+model SurveyCategory {
+  id      Int          @id @default(autoincrement())
+  name    String
+  code    String
+  surveys SurveyType[]
+}
+
+model SurveyType {
+  id          Int              @id @default(autoincrement())
+  code        String           @unique
+  name        String
+  description String?
+  categoryId  Int
+  questions   SurveyQuestion[]
+  category    SurveyCategory   @relation(fields: [categoryId], references: [id])
+  userSurveys UserSurvey[]
+
+  @@index([categoryId], map: "SurveyType_categoryId_fkey")
+}
+
+model SurveyQuestion {
+  id           Int        @id @default(autoincrement())
+  surveyTypeId Int
+  ageGroup     String
+  order        Int
+  content      String
+  isReverse    Boolean
+  surveyType   SurveyType @relation(fields: [surveyTypeId], references: [id])
+
+  @@index([surveyTypeId], map: "SurveyQuestion_surveyTypeId_fkey")
+}
+
+model UserSurvey {
+  id             Int        @id @default(autoincrement())
+  userId         Int
+  surveyTypeId   Int
+  createdAt      DateTime   @default(now())
+  totalScore     Int
+  interpretation String
+  answers        Json
+  surveyType     SurveyType @relation(fields: [surveyTypeId], references: [id])
+  user           User       @relation(fields: [userId], references: [id])
+
+  @@index([surveyTypeId], map: "UserSurvey_surveyTypeId_fkey")
+  @@index([userId], map: "UserSurvey_userId_fkey")
 }
