@@ -195,6 +195,103 @@ async function main() {
       },
     ],
   });
+
+  // 9. 카테고리(대인관계/소통어려움) upsert
+  const relationship = await prisma.surveyCategory.upsert({
+    where: { code: 'relationship' },
+    update: {},
+    create: { name: '대인관계/소통어려움', code: 'relationship' },
+  });
+
+  // 10. IPIP Assertiveness Scale 설문타입 생성 (type: 'professional')
+  const ipipAssertiveness = await prisma.surveyType.upsert({
+    where: { code: 'IPIP-ASS' },
+    update: {},
+    create: {
+      code: 'IPIP-ASS',
+      name: 'IPIP Assertiveness Scale',
+      description: 'IPIP 기반 대인관계/소통 자기주장성 전문 설문',
+      categoryId: relationship.id,
+      type: 'professional',
+    },
+  });
+
+  // 11. 30문항 생성 (ageGroup: 'all')
+  const assertivenessQuestions = [
+    '나는 사람들 앞에서 나의 의견을 분명히 말한다.',
+    '나는 새로운 사람에게 쉽게 다가간다.',
+    '나는 나에게 부당한 대우를 받으면 바로 말한다.',
+    '나는 회의나 모임에서 내 생각을 표현한다.',
+    '나는 비판을 받아도 감정적으로 무너지지 않는다.',
+    '나는 부탁을 거절하는 것이 어렵지 않다.',
+    '나는 갈등 상황에서 내 입장을 분명히 한다.',
+    '나는 타인과의 논쟁을 회피하지 않는다.',
+    '나는 내 감정을 숨기지 않고 표현하는 편이다.',
+    '나는 내 권리를 지키기 위해 목소리를 낸다.',
+    '나는 누군가의 요구가 불합리하면 거절할 수 있다.',
+    '나는 타인과 동등하게 관계를 맺으려 한다.',
+    '나는 내 감정과 생각을 솔직하게 표현한다.',
+    '나는 지시를 받는 것보다 주도적으로 행동하고 싶다.',
+    '나는 문제 상황에서 대화를 주도하는 편이다.',
+    '나는 어려운 주제도 회피하지 않고 이야기한다.',
+    '나는 다른 사람들의 기분만을 지나치게 고려하지 않는다.',
+    '나는 내 결정에 대해 확신을 가지고 말한다.',
+    '나는 타인의 평가보다 나의 신념을 중요하게 여긴다.',
+    '나는 타인과 의견이 다를 때 불편함을 느끼지 않는다.',
+    '나는 필요하다면 감정을 강하게 표현하기도 한다.',
+    '나는 내 권리나 필요를 정중하게 주장할 수 있다.',
+    '나는 불편한 요청을 단호히 거절할 수 있다.',
+    '나는 사소한 문제라도 내 생각을 분명히 밝힌다.',
+    '나는 관계 속에서 나를 희생하지 않으려 노력한다.',
+    '나는 대화 중 상대에게 주도권을 빼앗기지 않는다.',
+    '나는 비판을 피하려고 내 생각을 숨기지 않는다.',
+    '나는 누군가가 불합리한 요청을 하면 정중히 거절한다.',
+    '나는 내 목소리를 내는 것을 두려워하지 않는다.',
+    '나는 내가 원하는 바를 명확히 전달할 수 있다.',
+  ];
+  await prisma.surveyQuestion.createMany({
+    data: assertivenessQuestions.map((content, idx) => ({
+      surveyTypeId: ipipAssertiveness.id,
+      ageGroup: 'all',
+      order: idx + 1,
+      content,
+      isReverse: false,
+    })),
+  });
+
+  // 12. 점수 해석 기준 생성
+  await prisma.surveyResult.createMany({
+    data: [
+      {
+        surveyTypeId: ipipAssertiveness.id,
+        minScore: 30,
+        maxScore: 59,
+        label: '매우 소극적 / 대인관계 회피형',
+        description: '',
+      },
+      {
+        surveyTypeId: ipipAssertiveness.id,
+        minScore: 60,
+        maxScore: 89,
+        label: '소극적인 편이나 평균 범주',
+        description: '',
+      },
+      {
+        surveyTypeId: ipipAssertiveness.id,
+        minScore: 90,
+        maxScore: 119,
+        label: '평균적인 자기주장성',
+        description: '',
+      },
+      {
+        surveyTypeId: ipipAssertiveness.id,
+        minScore: 120,
+        maxScore: 150,
+        label: '높은 자기주장성 / 사회적 자신감 높음',
+        description: '',
+      },
+    ],
+  });
 }
 
 main()
