@@ -12,11 +12,14 @@ import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
 import { ChangeNameDTO } from './dto/ChangeNameDTO';
 import { UserSwagger } from './swagger/user.swagger';
+import { ApiTags } from '@nestjs/swagger';
+import { BasicInfoSwagger } from './swagger/basic-info.swagger';
 //import { BasicInfoDTO } from './dto/BasicInfoDTO';
 
 @Controller('users')
 @UseGuards(JwtAuthGuard)
 @UserSwagger.controller
+@ApiTags('User')
 export class UserController {
   constructor(private readonly userService: UserService) {}
 
@@ -55,6 +58,9 @@ export class UserController {
   }
 
   @Get('basic-info/questions')
+  @BasicInfoSwagger.getQuestions.operation
+  @BasicInfoSwagger.getQuestions.body
+  @BasicInfoSwagger.getQuestions.response
   async getBasicSurveyQuestions(
     @GetUser() user: any,
     @Body() dto: { age: number; gender: string; categoryCode: string }
@@ -63,6 +69,9 @@ export class UserController {
   }
 
   @Post('basic-info/submit')
+  @BasicInfoSwagger.submit.operation
+  @BasicInfoSwagger.submit.body
+  @BasicInfoSwagger.submit.response
   async submitBasicSurvey(
     @GetUser() user: any,
     @Body() dto: { surveyType: string; answers: number[] }

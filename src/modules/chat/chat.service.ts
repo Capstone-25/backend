@@ -16,9 +16,18 @@ export class ChatService {
 
   // 5. 새로운 채팅방 생성
   async createSession(userId: number, title?: string) {
-    return this.prisma.chatSession.create({
-      data: { userId, title },
+    const session = await this.prisma.chatSession.create({
+      data: { userId: userId, title: title },
     });
+    // 반환값에서 id를 chatId로 바꿔서 반환
+    return {
+      chatId: session.id,
+      userId: session.userId,
+      title: session.title,
+      persona: session.persona,
+      createdAt: session.createdAt,
+      updatedAt: session.updatedAt,
+    };
   }
 
   // 6. 채팅방 삭제

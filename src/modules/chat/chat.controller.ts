@@ -11,14 +11,13 @@ import {
 } from '@nestjs/common';
 import { ChatService } from './chat.service';
 import { JwtAuthGuard } from '@src/modules/auth/guards/jwt-auth.guard';
-import { CreateSessionDto } from './dto/CreateSessionDto';
 import { SendMessageDto } from './dto/SendMessageDto';
 import { ChangePersonaDto } from './dto/ChangePersonaDto';
 import { ChatResponseDto } from './dto/ChatResponseDto';
 import { ChatMessageDto } from './dto/ChatMessageDto';
 import { ApiTags } from '@nestjs/swagger';
 import { ChatSwagger } from './swagger/chat.swagger';
-
+import { CreateSessionDto } from './dto/CreateSessionDto';
 @ApiTags('Chat')
 @Controller('chat')
 @UseGuards(JwtAuthGuard)

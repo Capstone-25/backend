@@ -1,10 +1,6 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { IsString } from 'class-validator';
 
 export class CreateSessionDto {
-  @ApiProperty({
-    description: '채팅방 제목',
-    required: false,
-    example: '첫 번째 대화',
-  })
-  title?: string;
+  @IsString()
+  title: string;
 }
