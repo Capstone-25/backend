@@ -295,6 +295,8 @@ model SurveyType {
   description String?
   categoryId  Int
   type        String
+  minScale    Int              // 최소 척도값(예: 0, 1)
+  maxScale    Int              // 최대 척도값(예: 3, 4, 5)
   questions   SurveyQuestion[]
   category    SurveyCategory   @relation(fields: [categoryId], references: [id])
   userSurveys UserSurvey[]

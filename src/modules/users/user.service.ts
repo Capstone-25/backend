@@ -49,6 +49,7 @@ export class UserService {
     // 2. 고민유형(카테고리 코드)에 맞는 surveyType 찾기
     const surveyType = await this.prisma.surveyType.findFirst({
       where: { category: { code: dto.categoryCode } },
+      select: { id: true, code: true, minScale: true, maxScale: true },
     });
     if (!surveyType) throw new Error('해당 고민유형에 맞는 검사가 없습니다.');
 
@@ -61,9 +62,46 @@ export class UserService {
       orderBy: { order: 'asc' },
     });
 
+    // 5. 응답이 들어온 경우 점수 계산 및 결과 해석
+    let totalScore = null;
+    let interpretation = null;
+    if (dto.answers && dto.answers.length === questions.length) {
+      const minScale = surveyType.minScale;
+      const maxScale = surveyType.maxScale;
+      totalScore = questions.reduce((sum, q, i) => {
+        const answer = dto.answers[i];
+        if (q.isReverse) {
+          return sum + (maxScale + minScale - answer);
+        } else {
+          return sum + answer;
+        }
+      }, 0);
+      // 결과 해석
+      const result = await this.prisma.surveyResult.findFirst({
+        where: {
+          surveyTypeId: surveyType.id,
+          minScore: { lte: totalScore },
+          maxScore: { gte: totalScore },
+        },
+      });
+      interpretation = result ? result.label : null;
+      // 결과 저장
+      await this.prisma.userSurvey.create({
+        data: {
+          userId,
+          surveyTypeId: surveyType.id,
+          totalScore,
+          interpretation: interpretation || '',
+          answers: dto.answers,
+        },
+      });
+    }
+
     return {
       surveyType: surveyType.code,
       questions,
+      totalScore,
+      interpretation,
     };
   }
 

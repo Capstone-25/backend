@@ -19,6 +19,8 @@ async function main() {
       description: 'IPIP 기반 우울/무기력 전문 설문',
       categoryId: depression.id,
       type: 'professional',
+      minScale: 1,
+      maxScale: 5,
     },
   });
 
@@ -116,6 +118,8 @@ async function main() {
       description: 'IPIP 기반 불안/긴장 전문 설문',
       categoryId: anxiety.id,
       type: 'professional',
+      minScale: 1,
+      maxScale: 5,
     },
   });
 
@@ -213,6 +217,8 @@ async function main() {
       description: 'IPIP 기반 대인관계/소통 자기주장성 전문 설문',
       categoryId: relationship.id,
       type: 'professional',
+      minScale: 1,
+      maxScale: 5,
     },
   });
 
@@ -310,6 +316,8 @@ async function main() {
       description: 'IPIP 기반 진로/미래불안 통제감 전문 설문',
       categoryId: future.id,
       type: 'professional',
+      minScale: 1,
+      maxScale: 5,
     },
   });
 
@@ -415,6 +423,8 @@ async function main() {
       description: '학업/성적 스트레스 전문 설문',
       categoryId: academic.id,
       type: 'professional',
+      minScale: 1,
+      maxScale: 5,
     },
   });
 
@@ -509,6 +519,8 @@ async function main() {
       description: '직장/업무 스트레스 전문 설문',
       categoryId: work.id,
       type: 'professional',
+      minScale: 1,
+      maxScale: 5,
     },
   });
 
@@ -728,6 +740,8 @@ async function main() {
       description: 'IPIP 기반 가족관계 전문 설문',
       categoryId: family.id,
       type: 'professional',
+      minScale: 1,
+      maxScale: 5,
     },
   });
 
@@ -831,6 +845,8 @@ async function main() {
       description: '애착 불안/회피 전문 설문',
       categoryId: attachment.id,
       type: 'professional',
+      minScale: 1,
+      maxScale: 6,
     },
   });
 
@@ -956,6 +972,8 @@ async function main() {
       description: '국제 성격 5요인 60문항',
       categoryId: big5.id,
       type: 'professional',
+      minScale: 1,
+      maxScale: 5,
     },
   });
 
@@ -1105,6 +1123,8 @@ async function main() {
       description: '건강행동 체크리스트(40문항)',
       categoryId: health.id,
       type: 'professional',
+      minScale: 1,
+      maxScale: 5,
     },
   });
 
@@ -1222,6 +1242,8 @@ async function main() {
       description: '해리성 경험 다차원 척도(60문항)',
       categoryId: dissociation.id,
       type: 'professional',
+      minScale: 0,
+      maxScale: 10,
     },
   });
 

@@ -32,4 +32,11 @@ export class BasicInfoDTO {
   })
   @IsNotEmpty()
   categoryCode: string;
+
+  @ApiProperty({
+    description: '설문 응답값 배열',
+    example: [1, 2, 3],
+  })
+  @IsNotEmpty()
+  answers: number[];
 }

@@ -65,6 +65,8 @@ async function main() {
       description: '우울/무기력 평가',
       categoryId: depression.id,
       type: 'simple',
+      minScale: 0,
+      maxScale: 3,
     },
   });
   const gad7 = await prisma.surveyType.upsert({
@@ -76,6 +78,8 @@ async function main() {
       description: '불안/긴장 평가',
       categoryId: anxiety.id,
       type: 'simple',
+      minScale: 0,
+      maxScale: 3,
     },
   });
   const rses = await prisma.surveyType.upsert({
@@ -87,6 +91,8 @@ async function main() {
       description: '자존감 평가',
       categoryId: selfUnderstanding.id,
       type: 'simple',
+      minScale: 1,
+      maxScale: 4,
     },
   });
   const pss = await prisma.surveyType.upsert({
@@ -98,6 +104,8 @@ async function main() {
       description: '스트레스 평가',
       categoryId: lifestyle.id,
       type: 'simple',
+      minScale: 0,
+      maxScale: 4,
     },
   });
   const ata = await prisma.surveyType.upsert({
@@ -109,6 +117,8 @@ async function main() {
       description: '시험 불안 평가',
       categoryId: academic.id,
       type: 'simple',
+      minScale: 1,
+      maxScale: 5,
     },
   });
   const kfaces = await prisma.surveyType.upsert({
@@ -120,6 +130,8 @@ async function main() {
       description: '가족 적응력 평가',
       categoryId: family.id,
       type: 'simple',
+      minScale: 1,
+      maxScale: 5,
     },
   });
   const reqo = await prisma.surveyType.upsert({
@@ -131,6 +143,8 @@ async function main() {
       description: '연애/이별 자존감 및 정서 척도',
       categoryId: romantic.id,
       type: 'simple',
+      minScale: 0,
+      maxScale: 3,
     },
   });
 
