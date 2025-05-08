@@ -8,7 +8,7 @@ import { FirebaseModule } from '@src/config/firebase.module';
 import { NotificationModule } from '@src/modules/notification/notification.module';
 import { SchedulerModule } from '@src/modules/scheduler/scheduler.module';
 import { VoiceModule } from './modules/voice/voice.module';
-
+import { SurveyModule } from './modules/surveys/survey.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -22,6 +22,7 @@ import { VoiceModule } from './modules/voice/voice.module';
     NotificationModule,
     SchedulerModule,
     VoiceModule,
+    SurveyModule,
   ],
 })
 export class AppModule {}
