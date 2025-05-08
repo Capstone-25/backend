@@ -67,7 +67,7 @@ export class SurveyService {
   ) {
     const surveyType = await this.prisma.surveyType.findUnique({
       where: { code: dto.surveyType },
-      select: { id: true, minScale: true, maxScale: true },
+      select: { id: true, minScale: true, maxScale: true, code: true },
     });
     if (!surveyType) throw new Error('설문타입이 존재하지 않습니다.');
     const questions = await this.prisma.surveyQuestion.findMany({
@@ -78,6 +78,50 @@ export class SurveyService {
       throw new Error('응답 개수가 문항 수와 다릅니다.');
     const minScale = surveyType.minScale;
     const maxScale = surveyType.maxScale;
+
+    // ASQ-SF(attachment) 분기 처리
+    if (surveyType.code === 'ASQ-SF') {
+      // 1~20: 불안, 21~40: 회피
+      const anxietyAvg =
+        dto.answers.slice(0, 20).reduce((a, b) => a + b, 0) / 20;
+      const avoidanceAvg =
+        dto.answers.slice(20, 40).reduce((a, b) => a + b, 0) / 20;
+      const anxietyResult = await this.prisma.surveyResult.findFirst({
+        where: {
+          surveyTypeId: surveyType.id,
+          minScore: { lte: anxietyAvg },
+          maxScore: { gte: anxietyAvg },
+          description: '불안 점수',
+        },
+      });
+      const avoidanceResult = await this.prisma.surveyResult.findFirst({
+        where: {
+          surveyTypeId: surveyType.id,
+          minScore: { lte: avoidanceAvg },
+          maxScore: { gte: avoidanceAvg },
+          description: '회피 점수',
+        },
+      });
+      // interpretation에 두 해석을 모두 저장
+      const interpretation = `불안: ${anxietyResult?.label || ''}, 회피: ${avoidanceResult?.label || ''}`;
+      const userSurvey = await this.prisma.userSurvey.create({
+        data: {
+          userId,
+          surveyTypeId: surveyType.id,
+          totalScore: 0, // 평균점수 방식이므로 총점은 의미 없음
+          interpretation,
+          answers: dto.answers,
+        },
+      });
+      return {
+        anxietyAvg,
+        avoidanceAvg,
+        anxietyInterpretation: anxietyResult?.label,
+        avoidanceInterpretation: avoidanceResult?.label,
+        userSurveyId: userSurvey.id,
+      };
+    }
+    // ... 기존 총점 방식 ...
     const totalScore = questions.reduce((sum, q, i) => {
       const answer = dto.answers[i];
       if (q.isReverse) {
