@@ -1,4 +1,4 @@
-import { ApiOperation, ApiResponse, ApiTags, ApiParam, ApiBody } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiParam, ApiBody } from '@nestjs/swagger';
 import { CreateSessionDto } from '../dto/CreateSessionDto';
 import { SendMessageDto } from '../dto/SendMessageDto';
 import { ChangePersonaDto } from '../dto/ChangePersonaDto';
@@ -11,16 +11,22 @@ export const ChatSwagger = {
       summary: '새로운 채팅방 생성',
       description: '사용자를 위한 새로운 채팅방을 생성합니다.',
     }),
+    body: ApiBody({
+      type: CreateSessionDto,
+      description: '채팅방 제목',
+    }),
     response: ApiResponse({
       status: 201,
       description: '채팅방 생성 성공',
       type: 'object',
       schema: {
         example: {
-          id: 1,
+          chatId: 1,
           userId: 1,
           title: '첫 번째 대화',
+          persona: '26살_한여름',
           createdAt: '2024-05-03T12:00:00.000Z',
+          updatedAt: '2024-05-03T12:00:00.000Z',
         },
       },
     }),
@@ -132,4 +138,4 @@ export const ChatSwagger = {
       },
     }),
   },
-}; 
+};

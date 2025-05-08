@@ -27,6 +27,7 @@ export class ChatController {
   // 5. 새 채팅방 생성
   @Post()
   @ChatSwagger.createSession.operation
+  @ChatSwagger.createSession.body
   @ChatSwagger.createSession.response
   async createSession(@Req() req, @Body() dto: CreateSessionDto) {
     return this.chatService.createSession(req.user.userId, dto.title);
