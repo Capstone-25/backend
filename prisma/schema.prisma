@@ -283,25 +283,25 @@ model NotificationSchedule {
 model SurveyCategory {
   id          Int                @id @default(autoincrement())
   name        String
-  code        String   @unique
-  surveyTypes SurveyType[]
+  code        String             @unique
   assignments SurveyAssignment[]
+  surveyTypes SurveyType[]
 }
 
 model SurveyType {
-  id          Int              @id @default(autoincrement())
-  code        String           @unique
+  id          Int                @id @default(autoincrement())
+  code        String             @unique
   name        String
   description String?
   categoryId  Int
   type        String
-  minScale    Int              // 최소 척도값(예: 0, 1)
-  maxScale    Int              // 최대 척도값(예: 3, 4, 5)
-  questions   SurveyQuestion[]
-  category    SurveyCategory   @relation(fields: [categoryId], references: [id])
-  userSurveys UserSurvey[]
-  results     SurveyResult[]
+  minScale    Int
+  maxScale    Int
   assignments SurveyAssignment[]
+  questions   SurveyQuestion[]
+  results     SurveyResult[]
+  category    SurveyCategory     @relation(fields: [categoryId], references: [id])
+  userSurveys UserSurvey[]
 
   @@index([categoryId], map: "SurveyType_categoryId_fkey")
 }
@@ -348,9 +348,11 @@ model SurveyResult {
 model SurveyAssignment {
   id           Int            @id @default(autoincrement())
   categoryId   Int
-  ageGroup     String         // 'teen' | 'adult' | 'senior'
+  ageGroup     String
   surveyTypeId Int
-
   category     SurveyCategory @relation(fields: [categoryId], references: [id])
   surveyType   SurveyType     @relation(fields: [surveyTypeId], references: [id])
+
+  @@index([categoryId], map: "SurveyAssignment_categoryId_fkey")
+  @@index([surveyTypeId], map: "SurveyAssignment_surveyTypeId_fkey")
 }
