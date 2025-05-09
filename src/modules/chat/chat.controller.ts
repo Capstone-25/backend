@@ -84,7 +84,7 @@ export class ChatController {
   @ChatSwagger.endSession.operation
   @ChatSwagger.endSession.param
   @ChatSwagger.endSession.response
-  async endSession(@Param('sessionId') id: string) {
-    return this.chatService.endSession(+id);
+  async endSession(@Req() req, @Param('sessionId') id: string) {
+    return this.chatService.endSession(req.user.userId, +id);
   }
 }

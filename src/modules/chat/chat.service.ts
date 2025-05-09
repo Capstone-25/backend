@@ -118,9 +118,10 @@ export class ChatService {
   }
 
   // 4. 채팅 종료 및 분석 요청
-  async endSession(sessionId: number) {
-    const res = await axios.post(`${this.aiServer}/chat/analyze`, {
-      sessionId,
+  async endSession(userId: number, sessionId: number) {
+    const res = await axios.post(`${this.aiServer}/generate_report`, {
+      userId,
+      chatId: sessionId,
     });
     return res.data;
   }
