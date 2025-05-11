@@ -187,23 +187,23 @@ model SurveyAssignment {
 
 model ChatAnalysis {
   id          Int      @id @default(autoincrement())
-  chatId      Int
+  sessionId      Int
   userId      Int
   timestamp   DateTime
   topic       Json
   emotion     Json
   distortions Json
   createdAt   DateTime @default(now())
-  chatSession ChatSession @relation(fields: [chatId], references: [id])
+  chatSession ChatSession @relation(fields: [sessionId], references: [id])
   user        User        @relation(fields: [userId], references: [id])
 
-  @@index([chatId])
+  @@index([sessionId])
   @@index([userId])
 }
 
 model Mission {
   id        Int      @id @default(autoincrement())
-  chatId    Int
+  sessionId Int
   userId    Int
   title     String
   detail    String
@@ -213,9 +213,9 @@ model Mission {
   completedAt DateTime?                     // 완료 시각(선택)
   progress    Int?                          // 진행률(선택)
   createdAt DateTime @default(now())
-  chatSession ChatSession @relation(fields: [chatId], references: [id])
+  chatSession ChatSession @relation(fields: [sessionId], references: [id])
   user        User        @relation(fields: [userId], references: [id])
 
-  @@index([chatId])
+  @@index([sessionId])
   @@index([userId])
 }
