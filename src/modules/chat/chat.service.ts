@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 //import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { PrismaService } from '@src/prisma/prisma.service';
 import axios from 'axios';
@@ -119,10 +119,47 @@ export class ChatService {
 
   // 4. 채팅 종료 및 분석 요청
   async endSession(userId: number, sessionId: number) {
+    const userMessageCount = await this.prisma.chatMessage.count({
+      where: { sessionId, sender: 'user' },
+    });
+    if (userMessageCount < 15) {
+      throw new BadRequestException('15턴 이상 대화 시 분석이 가능합니다.');
+    }
+    // 1. AI 서버에 분석 요청
     const res = await axios.post(`${this.aiServer}/generate_report`, {
       userId,
       chatId: sessionId,
     });
-    return res.data;
+    const report = res.data;
+
+    // 2. 분석 결과 저장 (ChatAnalysis)
+    await this.prisma.chatAnalysis.create({
+      data: {
+        sessionId: sessionId,
+        userId: userId,
+        timestamp: report.timestamp ? new Date(report.timestamp) : new Date(),
+        topic: report.report.missionTopic,
+        emotion: report.report.missionEmotion,
+        distortions: report.report.missionDistortion,
+      },
+    });
+
+    // 3. 미션 저장 (Mission)
+    if (Array.isArray(report.report.missions)) {
+      for (const mission of report.report.missions) {
+        await this.prisma.mission.create({
+          data: {
+            sessionId: sessionId,
+            userId: userId,
+            title: mission.title,
+            detail: mission.detail,
+            period: mission.period,
+            frequency: mission.frequency,
+          },
+        });
+      }
+    }
+
+    return report;
   }
 }
