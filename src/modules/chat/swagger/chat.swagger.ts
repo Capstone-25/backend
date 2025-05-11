@@ -116,7 +116,8 @@ export const ChatSwagger = {
   endSession: {
     operation: ApiOperation({
       summary: '채팅 종료 및 분석',
-      description: '채팅을 종료하고 대화 내용을 분석합니다.',
+      description:
+        '채팅을 종료하고 대화 내용을 분석합니다.\n\n※ 15턴(메시지) 이상 대화해야 분석이 가능합니다. 15턴 미만일 경우 400 에러가 반환됩니다.',
     }),
     param: ApiParam({
       name: 'sessionId',
@@ -129,11 +130,40 @@ export const ChatSwagger = {
       type: 'object',
       schema: {
         example: {
-          analysis: {
-            emotion: 'positive',
-            keyTopics: ['일상', '취미'],
-            suggestions: ['일기 작성', '관련 콘텐츠 추천'],
+          userId: 4,
+          chatId: 4,
+          timestamp: '2025-05-11T19:38:36.500723+09:00',
+          report: {
+            missionTopic: { '학업/성적 스트레스': 5 },
+            missionEmotion: { 슬픔: 45, 불안: 30 },
+            missionDistortion: [
+              {
+                name: '재앙화',
+                example: '시험망쳐서 죽고싶어',
+                explanation: '...',
+                advice: '...',
+              },
+            ],
+            missions: [
+              {
+                title: '감정 일기 쓰기',
+                detail: '...',
+                period: '1주일',
+                frequency: '7회',
+              },
+            ],
           },
+        },
+      },
+    }),
+    errorResponse: ApiResponse({
+      status: 400,
+      description: '15턴 미만일 때: 분석 불가 에러',
+      schema: {
+        example: {
+          statusCode: 400,
+          message: '15턴 이상 대화 시 분석이 가능합니다.',
+          error: 'Bad Request',
         },
       },
     }),
