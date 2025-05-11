@@ -78,4 +78,9 @@ export class UserController {
   ) {
     return await this.userService.submitBasicSurvey(user.userId, dto);
   }
+
+  @Get('basic-info/completed')
+  async isBasicSurveyCompleted(@GetUser() user: any) {
+    return await this.userService.isBasicSurveyCompleted(user.userId);
+  }
 }

@@ -128,4 +128,15 @@ export class UserService {
       interpretation,
     };
   }
+
+  // 기초 심리검사 완료 여부 확인
+  async isBasicSurveyCompleted(
+    userId: number
+  ): Promise<{ completed: boolean }> {
+    // 기초 설문에 해당하는 surveyTypeId 목록이 여러 개라면, 조건 추가 가능
+    const completed = await this.prisma.userSurvey.findFirst({
+      where: { userId },
+    });
+    return { completed: !!completed };
+  }
 }
