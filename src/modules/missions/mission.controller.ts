@@ -2,7 +2,9 @@ import { Controller, Get, Patch, Param, UseGuards, Req } from '@nestjs/common';
 import { MissionService } from '@src/modules/missions/mission.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { MissionSwagger } from './swagger/mission.swagger';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Missions')
 @Controller('missions')
 @UseGuards(JwtAuthGuard)
 export class MissionController {

@@ -10,6 +10,7 @@ import { SchedulerModule } from '@src/modules/scheduler/scheduler.module';
 import { VoiceModule } from './modules/voice/voice.module';
 import { SurveyModule } from './modules/surveys/survey.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
+import { MissionModule } from './modules/missions/mission.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -25,6 +26,7 @@ import { AnalyticsModule } from './modules/analytics/analytics.module';
     VoiceModule,
     SurveyModule,
     AnalyticsModule,
+    MissionModule,
   ],
 })
 export class AppModule {}

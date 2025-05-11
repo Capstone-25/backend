@@ -13,7 +13,9 @@ import { VoiceService } from './voice.service';
 import { Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { VoiceChatSwagger } from './swagger/voice.swagger';
+import { ApiTags } from '@nestjs/swagger';
 
+@ApiTags('Voice Chat')
 @Controller('voice-chat')
 export class VoiceController {
   constructor(private readonly voiceService: VoiceService) {}
