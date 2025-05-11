@@ -23,110 +23,13 @@ model User {
   googleTokenExpiry         DateTime?
   age                       Int?
   fcmToken                  String?                @unique
-  actionMissions            ActionMission[]
   calendarEvents            CalendarEvent[]
   chatSessions              ChatSession[]
-  contentUsages             ContentUsage[]
-  emotionAnalyses           EmotionAnalysis[]
-  emotionLogs               EmotionLog[]
-  goals                     Goal[]
-  journals                  Journal[]
   notifications             Notification[]
   notificationSchedules     NotificationSchedule[]
-  userInterests             UserInterest[]
   userSurveys               UserSurvey[]
-}
-
-model EmotionLog {
-  id             Int       @id @default(autoincrement())
-  userId         Int
-  date           DateTime
-  primaryEmotion String
-  emotionValues  Json
-  notes          String?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @default(now()) @updatedAt
-  user           User      @relation(fields: [userId], references: [id])
-  journals       Journal[]
-
-  @@index([userId], map: "EmotionLog_userId_fkey")
-}
-
-model Journal {
-  id           Int                 @id @default(autoincrement())
-  userId       Int
-  title        String?
-  content      String
-  emotionLogId Int?
-  date         DateTime
-  tags         String?
-  isVoiceEntry Boolean             @default(false)
-  voiceUrl     String?
-  createdAt    DateTime            @default(now())
-  updatedAt    DateTime            @default(now()) @updatedAt
-  emotionLog   EmotionLog?         @relation(fields: [emotionLogId], references: [id])
-  user         User                @relation(fields: [userId], references: [id])
-  attachments  JournalAttachment[]
-
-  @@index([emotionLogId], map: "Journal_emotionLogId_fkey")
-  @@index([userId], map: "Journal_userId_fkey")
-}
-
-model JournalAttachment {
-  id        Int      @id @default(autoincrement())
-  journalId Int
-  fileUrl   String
-  fileType  String
-  createdAt DateTime @default(now())
-  journal   Journal  @relation(fields: [journalId], references: [id])
-
-  @@index([journalId], map: "JournalAttachment_journalId_fkey")
-}
-
-model Goal {
-  id           Int             @id @default(autoincrement())
-  userId       Int
-  title        String
-  description  String?
-  category     String?
-  targetValue  Int
-  unit         String
-  currentValue Int             @default(0)
-  startDate    DateTime
-  deadline     DateTime?
-  isCompleted  Boolean         @default(false)
-  completedAt  DateTime?
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @default(now()) @updatedAt
-  user         User            @relation(fields: [userId], references: [id])
-  milestones   GoalMilestone[]
-  progressLogs GoalProgress[]
-
-  @@index([userId], map: "Goal_userId_fkey")
-}
-
-model GoalMilestone {
-  id          Int       @id @default(autoincrement())
-  goalId      Int
-  title       String
-  isCompleted Boolean   @default(false)
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  goal        Goal      @relation(fields: [goalId], references: [id])
-
-  @@index([goalId], map: "GoalMilestone_goalId_fkey")
-}
-
-model GoalProgress {
-  id        Int      @id @default(autoincrement())
-  goalId    Int
-  value     Int
-  date      DateTime
-  notes     String?
-  createdAt DateTime @default(now())
-  goal      Goal     @relation(fields: [goalId], references: [id])
-
-  @@index([goalId], map: "GoalProgress_goalId_fkey")
+  chatAnalyses ChatAnalysis[]
+  missions     Mission[]
 }
 
 model ChatSession {
@@ -138,6 +41,8 @@ model ChatSession {
   updatedAt DateTime      @default(now()) @updatedAt
   messages  ChatMessage[]
   user      User          @relation(fields: [userId], references: [id])
+  missions     Mission[]
+  chatAnalyses ChatAnalysis[]
 
   @@index([userId], map: "ChatSession_userId_fkey")
 }
@@ -149,86 +54,9 @@ model ChatMessage {
   content        String
   emotion        String?
   timestamp      DateTime        @default(now())
-  actionMissions ActionMission[]
   chatSession    ChatSession     @relation(fields: [sessionId], references: [id])
 
   @@index([sessionId], map: "ChatMessage_sessionId_fkey")
-}
-
-model ActionMission {
-  id            Int          @id @default(autoincrement())
-  userId        Int
-  title         String
-  description   String
-  chatMessageId Int?
-  isCompleted   Boolean      @default(false)
-  completedAt   DateTime?
-  deadline      DateTime?
-  createdAt     DateTime     @default(now())
-  chatMessage   ChatMessage? @relation(fields: [chatMessageId], references: [id])
-  user          User         @relation(fields: [userId], references: [id])
-
-  @@index([chatMessageId], map: "ActionMission_chatMessageId_fkey")
-  @@index([userId], map: "ActionMission_userId_fkey")
-}
-
-model Content {
-  id           Int            @id @default(autoincrement())
-  title        String
-  description  String?
-  type         String
-  category     String?
-  difficulty   String?
-  duration     Int?
-  fileUrl      String
-  thumbnailUrl String?
-  createdAt    DateTime       @default(now())
-  contentTags  ContentTag[]
-  usages       ContentUsage[]
-}
-
-model ContentTag {
-  contentId Int
-  tag       String
-  content   Content @relation(fields: [contentId], references: [id])
-
-  @@id([contentId, tag])
-}
-
-model ContentUsage {
-  id          Int       @id @default(autoincrement())
-  userId      Int
-  contentId   Int
-  progress    Int?
-  completed   Boolean   @default(false)
-  startedAt   DateTime  @default(now())
-  completedAt DateTime?
-  content     Content   @relation(fields: [contentId], references: [id])
-  user        User      @relation(fields: [userId], references: [id])
-
-  @@index([contentId], map: "ContentUsage_contentId_fkey")
-  @@index([userId], map: "ContentUsage_userId_fkey")
-}
-
-model EmotionAnalysis {
-  id           Int      @id @default(autoincrement())
-  userId       Int
-  periodStart  DateTime
-  periodEnd    DateTime
-  analysisData Json
-  insights     String?
-  createdAt    DateTime @default(now())
-  user         User     @relation(fields: [userId], references: [id])
-
-  @@index([userId], map: "EmotionAnalysis_userId_fkey")
-}
-
-model UserInterest {
-  userId   Int
-  interest String
-  user     User   @relation(fields: [userId], references: [id])
-
-  @@id([userId, interest])
 }
 
 model Notification {
@@ -355,4 +183,39 @@ model SurveyAssignment {
 
   @@index([categoryId], map: "SurveyAssignment_categoryId_fkey")
   @@index([surveyTypeId], map: "SurveyAssignment_surveyTypeId_fkey")
+}
+
+model ChatAnalysis {
+  id          Int      @id @default(autoincrement())
+  chatId      Int
+  userId      Int
+  timestamp   DateTime
+  topic       Json
+  emotion     Json
+  distortions Json
+  createdAt   DateTime @default(now())
+  chatSession ChatSession @relation(fields: [chatId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+
+  @@index([chatId])
+  @@index([userId])
+}
+
+model Mission {
+  id        Int      @id @default(autoincrement())
+  chatId    Int
+  userId    Int
+  title     String
+  detail    String
+  period    String
+  frequency String
+  isCompleted Boolean  @default(false)      // 완료 여부
+  completedAt DateTime?                     // 완료 시각(선택)
+  progress    Int?                          // 진행률(선택)
+  createdAt DateTime @default(now())
+  chatSession ChatSession @relation(fields: [chatId], references: [id])
+  user        User        @relation(fields: [userId], references: [id])
+
+  @@index([chatId])
+  @@index([userId])
 }
