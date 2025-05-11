@@ -17,7 +17,7 @@ export class ChatMessageDto {
   chatId: number;
 
   @ApiProperty({
-    description: '사용자 ID',
+    description: '사용자 ID (봇은 0)',
     example: 1,
   })
   @IsInt()
