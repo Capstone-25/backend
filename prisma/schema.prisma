@@ -24,37 +24,37 @@ model User {
   age                       Int?
   fcmToken                  String?                @unique
   calendarEvents            CalendarEvent[]
+  chatAnalyses              ChatAnalysis[]
   chatSessions              ChatSession[]
+  missions                  Mission[]
   notifications             Notification[]
   notificationSchedules     NotificationSchedule[]
   userSurveys               UserSurvey[]
-  chatAnalyses ChatAnalysis[]
-  missions     Mission[]
 }
 
 model ChatSession {
-  id        Int           @id @default(autoincrement())
-  userId    Int
-  title     String?
-  persona   String        @default("26살_한여름")
-  createdAt DateTime      @default(now())
-  updatedAt DateTime      @default(now()) @updatedAt
-  messages  ChatMessage[]
-  user      User          @relation(fields: [userId], references: [id])
-  missions     Mission[]
+  id           Int            @id @default(autoincrement())
+  userId       Int
+  title        String?
+  persona      String         @default("26살_한여름")
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @default(now()) @updatedAt
   chatAnalyses ChatAnalysis[]
+  messages     ChatMessage[]
+  user         User           @relation(fields: [userId], references: [id])
+  missions     Mission[]
 
   @@index([userId], map: "ChatSession_userId_fkey")
 }
 
 model ChatMessage {
-  id             Int             @id @default(autoincrement())
-  sessionId      Int
-  sender         String
-  content        String
-  emotion        String?
-  timestamp      DateTime        @default(now())
-  chatSession    ChatSession     @relation(fields: [sessionId], references: [id])
+  id          Int         @id @default(autoincrement())
+  sessionId   Int
+  sender      String
+  content     String
+  emotion     String?
+  timestamp   DateTime    @default(now())
+  chatSession ChatSession @relation(fields: [sessionId], references: [id])
 
   @@index([sessionId], map: "ChatMessage_sessionId_fkey")
 }
@@ -186,14 +186,14 @@ model SurveyAssignment {
 }
 
 model ChatAnalysis {
-  id          Int      @id @default(autoincrement())
-  sessionId      Int
+  id          Int         @id @default(autoincrement())
   userId      Int
   timestamp   DateTime
   topic       Json
   emotion     Json
   distortions Json
-  createdAt   DateTime @default(now())
+  createdAt   DateTime    @default(now())
+  sessionId   Int
   chatSession ChatSession @relation(fields: [sessionId], references: [id])
   user        User        @relation(fields: [userId], references: [id])
 
@@ -202,17 +202,17 @@ model ChatAnalysis {
 }
 
 model Mission {
-  id        Int      @id @default(autoincrement())
-  sessionId Int
-  userId    Int
-  title     String
-  detail    String
-  period    String
-  frequency String
-  isCompleted Boolean  @default(false)
+  id          Int         @id @default(autoincrement())
+  userId      Int
+  title       String
+  detail      String
+  period      String
+  frequency   String
+  isCompleted Boolean     @default(false)
   completedAt DateTime?
-  progress    Int?                @default(0)
-  createdAt DateTime @default(now())
+  progress    Int?        @default(0)
+  createdAt   DateTime    @default(now())
+  sessionId   Int
   chatSession ChatSession @relation(fields: [sessionId], references: [id])
   user        User        @relation(fields: [userId], references: [id])
 
