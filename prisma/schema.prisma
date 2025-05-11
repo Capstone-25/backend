@@ -209,9 +209,9 @@ model Mission {
   detail    String
   period    String
   frequency String
-  isCompleted Boolean  @default(false)      // 완료 여부
-  completedAt DateTime?                     // 완료 시각(선택)
-  progress    Int?                          // 진행률(선택)
+  isCompleted Boolean  @default(false)
+  completedAt DateTime?
+  progress    Int?                @default(0)
   createdAt DateTime @default(now())
   chatSession ChatSession @relation(fields: [sessionId], references: [id])
   user        User        @relation(fields: [userId], references: [id])
