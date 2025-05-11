@@ -80,6 +80,8 @@ export class UserController {
   }
 
   @Get('basic-info/completed')
+  @UserSwagger.basicSurveyCompleted.operation
+  @UserSwagger.basicSurveyCompleted.response
   async isBasicSurveyCompleted(@GetUser() user: any) {
     return await this.userService.isBasicSurveyCompleted(user.userId);
   }

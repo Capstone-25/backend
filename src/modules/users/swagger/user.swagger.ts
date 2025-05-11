@@ -62,5 +62,19 @@ export const UserSwagger = {
       },
     }),
   },
+
+  basicSurveyCompleted: {
+    operation: ApiOperation({
+      summary: '기초 심리검사 완료 여부 확인',
+      description: '로그인한 사용자가 기초 심리검사(회원가입 설문)를 완료했는지 여부를 반환합니다.',
+    }),
+    response: ApiResponse({
+      status: 200,
+      description: '기초 심리검사 완료 여부 반환 성공',
+      schema: {
+        example: { completed: true },
+      },
+    }),
+  },
 };
  
