@@ -162,4 +162,26 @@ export class ChatService {
 
     return report;
   }
+
+  async greet(user: any, sessionId: number) {
+    const userInfo = await this.prisma.user.findUnique({
+      where: { id: user.userId },
+    });
+    const response = await axios.post(`${this.aiServer}/generate_greet`, {
+      userId: user.userId,
+      chatId: sessionId,
+      name: userInfo.name,
+      age: userInfo.age,
+      gender: userInfo.gender,
+    });
+    await this.prisma.chatMessage.create({
+      data: {
+        sessionId,
+        sender: 'bot',
+        content: response.data.greet,
+        timestamp: new Date(),
+      },
+    });
+    return response.data;
+  }
 }

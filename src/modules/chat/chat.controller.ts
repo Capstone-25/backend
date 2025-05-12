@@ -87,4 +87,9 @@ export class ChatController {
   async endSession(@Req() req, @Param('sessionId') id: string) {
     return this.chatService.endSession(req.user.userId, +id);
   }
+
+  @Post(':sessionId/greet')
+  async greet(@Req() req, @Param('sessionId') id: string) {
+    return this.chatService.greet(req.user, +id);
+  }
 }
