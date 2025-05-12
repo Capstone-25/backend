@@ -168,4 +168,29 @@ export const ChatSwagger = {
       },
     }),
   },
+
+  greet: {
+    operation: ApiOperation({
+      summary: '인사 메시지 전송',
+      description: '채팅방에 인사 메시지를 전송합니다.',
+    }),
+    param: ApiParam({
+      name: 'sessionId',
+      description: '인사 메시지를 보낼 채팅방 ID',
+      type: 'number',
+    }),
+    response: ApiResponse({
+      status: 200,
+      description: '인사 메시지 전송 성공',
+      type: 'object',
+      schema: {
+        example: {
+          userId: 4,
+          chatId: 4,
+          greet: '안녕하세요! 오늘은 어떤 이야기를 나누고 싶으신가요?',
+          timestamp: '2025-05-11T19:38:36.500723+09:00',
+        },
+      },
+    }),
+  },
 };

@@ -88,7 +88,11 @@ export class ChatController {
     return this.chatService.endSession(req.user.userId, +id);
   }
 
+  // 2. 인사 메시지 전송
   @Post(':sessionId/greet')
+  @ChatSwagger.greet.operation
+  @ChatSwagger.greet.param
+  @ChatSwagger.greet.response
   async greet(@Req() req, @Param('sessionId') id: string) {
     return this.chatService.greet(req.user, +id);
   }
