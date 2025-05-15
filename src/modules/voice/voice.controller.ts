@@ -38,7 +38,7 @@ export class VoiceController {
       return res.json(result);
     } catch {
       throw new HttpException(
-        'AI 서버 처리 실패',
+        'AI 서버 처리 오류',
         HttpStatus.INTERNAL_SERVER_ERROR
       );
     }
