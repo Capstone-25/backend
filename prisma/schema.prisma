@@ -84,6 +84,7 @@ model CalendarEvent {
   startTime             DateTime
   summary               String
   id                    Int                    @id @default(autoincrement())
+  emotion               String?
   user                  User                   @relation(fields: [userId], references: [id])
   notificationSchedules NotificationSchedule[]
 
