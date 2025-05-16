@@ -126,10 +126,28 @@ export class CalendarService {
     }
   }
 
+  async setEventEmotion(
+    eventId: string,
+    userId: number,
+    emotion: string
+  ): Promise<any> {
+    const event = await this.prisma.calendarEvent.findUnique({
+      where: { eventId },
+    });
+    if (!event || event.userId !== userId)
+      throw new Error('이벤트를 찾을 수 없거나 권한이 없습니다.');
+    await this.prisma.calendarEvent.update({
+      where: { eventId },
+      data: { emotion },
+    });
+    return { success: true };
+  }
+
   async getDbCalendarEvents(userId: number) {
-    return this.prisma.calendarEvent.findMany({
+    const events = await this.prisma.calendarEvent.findMany({
       where: { userId },
       orderBy: { startTime: 'asc' },
     });
+    return events;
   }
 }

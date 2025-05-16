@@ -44,6 +44,7 @@ export class CalendarController {
       start: { dateTime: event.startTime.toISOString() },
       end: { dateTime: event.endTime.toISOString() },
       location: event.location,
+      emotion: event.emotion,
     }));
     return {
       message: 'DB에 저장된 캘린더 이벤트 조회 성공',
