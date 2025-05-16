@@ -1,5 +1,5 @@
-import { Controller, Get, UseGuards, Req } from '@nestjs/common';
-import { ApiTags, ApiOperation, ApiResponse } from '@nestjs/swagger';
+import { Controller, Get, UseGuards, Req, Body, Patch } from '@nestjs/common';
+import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@src/modules/auth/guards/jwt-auth.guard';
 import { CalendarService } from './calendar.service';
 import { CalendarEventsResponseDto } from './dto/calendar-event.dto';
@@ -50,5 +50,31 @@ export class CalendarController {
       message: 'DB에 저장된 캘린더 이벤트 조회 성공',
       events,
     };
+  }
+
+  @Patch('event-emotion')
+  @UseGuards(JwtAuthGuard)
+  @ApiOperation({ summary: '캘린더 이벤트에 감정 할당' })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        eventId: { type: 'string', example: 'abc123' },
+        emotion: { type: 'string', example: '행복' },
+      },
+      required: ['eventId', 'emotion'],
+    },
+  })
+  @ApiResponse({
+    status: 200,
+    description: '감정 할당 성공',
+    schema: { example: { success: true } },
+  })
+  async setEventEmotion(
+    @Req() req,
+    @Body() body: { eventId: string; emotion: string }
+  ) {
+    const { eventId, emotion } = body;
+    return this.calendarService.setEventEmotion(eventId, req.user.id, emotion);
   }
 }
