@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '@src/prisma/prisma.service';
-import { ChangeNameDTO } from './dto/ChangeNameDTO';
+import { ChangeInfoDTO } from './dto/ChangeInfoDTO';
 //import { BasicInfoDTO } from './dto/BasicInfoDTO';
 
 @Injectable()
@@ -8,26 +8,38 @@ export class UserService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getMe(userId: number) {
-    return await this.prisma.user.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: {
         id: true,
         email: true,
         name: true,
         age: true,
-        gender: true,
-        googleAccessToken: true,
-        googleRefreshToken: true,
-        googleTokenExpiry: true,
       },
     });
+    return user;
   }
 
-  async updateMe(userId: number, dto: ChangeNameDTO) {
-    return await this.prisma.user.update({
-      where: { id: userId },
-      data: { name: dto.name },
-    });
+  async updateMe(userId: number, dto: ChangeInfoDTO) {
+    if (dto.name) {
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { name: dto.name },
+      });
+    }
+    if (dto.gender) {
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { gender: dto.gender },
+      });
+    }
+    if (dto.age) {
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: { age: dto.age },
+      });
+    }
+    return await this.getMe(userId);
   }
 
   async deleteMe(userId: number) {

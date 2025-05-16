@@ -10,7 +10,7 @@ import {
 import { UserService } from './user.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { GetUser } from '../auth/decorators/get-user.decorator';
-import { ChangeNameDTO } from './dto/ChangeNameDTO';
+import { ChangeInfoDTO } from './dto/ChangeInfoDTO';
 import { UserSwagger } from './swagger/user.swagger';
 import { ApiTags } from '@nestjs/swagger';
 import { BasicInfoSwagger } from './swagger/basic-info.swagger';
@@ -33,7 +33,7 @@ export class UserController {
   @Put('me')
   @UserSwagger.updateMe.operation
   @UserSwagger.updateMe.response
-  async updateMe(@GetUser() user: any, @Body() dto: ChangeNameDTO) {
+  async updateMe(@GetUser() user: any, @Body() dto: ChangeInfoDTO) {
     return await this.userService.updateMe(user.userId, dto);
   }
 
