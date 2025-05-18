@@ -6,23 +6,34 @@ import { PrismaService } from '@src/prisma/prisma.service';
 export class CalendarService {
   constructor(private readonly prisma: PrismaService) {}
 
-  private getGoogleCalendarClient(accessToken: string) {
-    const auth = new google.auth.OAuth2();
-    auth.setCredentials({ access_token: accessToken });
-    return google.calendar({ version: 'v3', auth });
-  }
-
   async getCalendarEvents(userId: number) {
     try {
       const user = await this.prisma.user.findUnique({ where: { id: userId } });
-      console.log(user.googleAccessToken);
       if (!user || !user.googleAccessToken) {
         throw new HttpException(
           '구글 캘린더 접근 권한이 없습니다.',
           HttpStatus.UNAUTHORIZED
         );
       }
-      const calendar = this.getGoogleCalendarClient(user.googleAccessToken);
+      const authClient = this.createOAuthClient(user);
+      const raw = await authClient.getAccessToken();
+      const newToken = typeof raw === 'string' ? raw : raw.token;
+      // 1) 토큰 리프레시
+      if (newToken) {
+        // 1) authClient에도 반영
+        const fullCreds = {
+          ...authClient.credentials, // 기존에 load 했던 refresh_token, expiry_date 포함
+          access_token: newToken, // 새로 받은 토큰
+        };
+        authClient.setCredentials(fullCreds);
+        // 2) DB에도 저장
+        await this.prisma.user.update({
+          where: { id: userId },
+          data: { googleAccessToken: newToken },
+        });
+      }
+      console.log('authClient', authClient.credentials);
+      const calendar = google.calendar({ version: 'v3', auth: authClient });
       const response = await calendar.events.list({
         calendarId: 'primary',
         timeMin: new Date().toISOString(),
@@ -35,18 +46,15 @@ export class CalendarService {
       await this.saveEventsToDB(userId, items);
       return items;
     } catch (error) {
-      console.log(error);
-      // if (error.response?.status === 401) {
-      //   // refreshToken 없이 바로 에러 반환
-      //   throw new HttpException(
-      //     '구글 연동이 만료되었습니다. 다시 연동해주세요.',
-      //     HttpStatus.UNAUTHORIZED
-      //   );
-      // }
-      // throw new HttpException(
-      //   '캘린더 정보를 가져오는데 실패했습니다.',
-      //   HttpStatus.INTERNAL_SERVER_ERROR
-      // );
+      console.log('[캘린더 연동 에러]', error);
+      if (error.response?.status === 401) {
+        await this.refreshGoogleAccessToken(userId, true);
+        return this.getCalendarEvents(userId);
+      }
+      throw new HttpException(
+        '캘린더 정보를 가져오는데 실패했습니다.',
+        HttpStatus.INTERNAL_SERVER_ERROR
+      );
     }
   }
 
@@ -99,5 +107,66 @@ export class CalendarService {
       orderBy: { startTime: 'asc' },
     });
     return events;
+  }
+
+  private async refreshGoogleAccessToken(userId: number, isFirst: boolean) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (isFirst) {
+      if (!user || !user.googleRefreshToken) {
+        throw new HttpException(
+          '구글 연동이 만료되었습니다. 다시 연동해주세요.',
+          HttpStatus.UNAUTHORIZED
+        );
+      }
+    }
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET
+    );
+    oauth2Client.setCredentials({ refresh_token: user.googleRefreshToken });
+    try {
+      const { credentials } = await oauth2Client.refreshAccessToken();
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          googleAccessToken: credentials.access_token,
+          googleRefreshToken:
+            credentials.refresh_token || user.googleRefreshToken,
+          googleTokenExpiry: new Date(Date.now() + 1 * 60 * 60 * 1000),
+        },
+      });
+      console.log(
+        '[캘린더 연동] accessToken 재발급 성공:',
+        credentials.access_token
+      );
+    } catch (err) {
+      console.error('[캘린더 연동] accessToken 재발급 실패:', err);
+      throw new HttpException(
+        '구글 연동이 만료되었습니다. 다시 연동해주세요.',
+        HttpStatus.UNAUTHORIZED
+      );
+    }
+  }
+
+  private createOAuthClient(user: {
+    googleAccessToken: string;
+    googleRefreshToken?: string;
+    googleTokenExpiry?: Date;
+  }) {
+    const oAuth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET,
+      process.env.GOOGLE_CALLBACK_URL
+    );
+
+    oAuth2Client.setCredentials({
+      access_token: user.googleAccessToken,
+      refresh_token: user.googleRefreshToken,
+      expiry_date: user.googleTokenExpiry?.getTime(),
+    });
+
+    return oAuth2Client;
   }
 }

@@ -26,6 +26,14 @@ export class AuthService {
       googleRefreshToken,
     } = payload;
 
+    const dataToSave: any = {
+      googleAccessToken,
+      googleTokenExpiry: new Date(Date.now() + 3600 * 1000),
+      lastLogin: new Date(),
+    };
+    if (googleRefreshToken) {
+      dataToSave.googleRefreshToken = googleRefreshToken;
+    }
     console.log('googleAccessToken', googleAccessToken);
     console.log('googleRefreshToken', googleRefreshToken);
     // 1) DB에서 유저 조회
@@ -35,12 +43,7 @@ export class AuthService {
     if (user) {
       user = await this.prisma.user.update({
         where: { id: user.id },
-        data: {
-          googleAccessToken,
-          googleRefreshToken,
-          googleTokenExpiry: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1시간 후 만료
-          lastLogin: new Date(),
-        },
+        data: dataToSave,
       });
     } else {
       user = await this.prisma.user.create({
@@ -49,10 +52,7 @@ export class AuthService {
           name,
           profileImageUrl,
           authProvider,
-          googleAccessToken,
-          googleRefreshToken,
-          googleTokenExpiry: new Date(Date.now() + 1 * 60 * 60 * 1000), // 1시간 후 만료
-          lastLogin: new Date(),
+          ...dataToSave,
         },
       });
     }

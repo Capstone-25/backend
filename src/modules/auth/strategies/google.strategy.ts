@@ -9,13 +9,23 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     const options = {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-      callbackURL: 'http://localhost:8080/auth/google/callback',
-      scope: ['email', 'profile', 'https://www.googleapis.com/auth/calendar'],
-      accessType: 'offline',
-      prompt: 'consent',
+      callbackURL: process.env.GOOGLE_CALLBACK_URL,
+      scope: [
+        'openid', // OIDC 필수
+        'email',
+        'profile',
+        'https://www.googleapis.com/auth/calendar',
+      ],
     };
     console.log('GoogleStrategy options:', options);
     super(options);
+  }
+
+  authorizationParams(): { [key: string]: string } {
+    return {
+      access_type: 'offline',
+      prompt: 'consent',
+    };
   }
 
   async validate(
@@ -24,8 +34,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
     profile: any,
     done: VerifyCallback
   ) {
-    console.log('accessToken', accessToken);
-    console.log('refreshToken', refreshToken);
     const { emails, displayName, photos } = profile;
     const userDto: AuthUserDto = {
       email: emails[0].value,
@@ -33,7 +41,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       profileImageUrl: photos[0]?.value,
       authProvider: 'google',
     };
-    // accessToken, refreshToken 모두 넘김
     done(null, {
       ...userDto,
       googleAccessToken: accessToken,
