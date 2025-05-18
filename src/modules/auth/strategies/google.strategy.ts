@@ -18,7 +18,7 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
 
   async validate(
     accessToken: string,
-    refreshToken: string,
+    refreshToken: string | undefined,
     profile: any,
     done: VerifyCallback
   ) {
@@ -29,12 +29,11 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
       profileImageUrl: photos[0]?.value,
       authProvider: 'google',
     };
-    // PassportContext에 토큰까지 붙여서 넘겨줍니다.
+    // accessToken, refreshToken 모두 넘김
     done(null, {
       ...userDto,
       googleAccessToken: accessToken,
       googleRefreshToken: refreshToken,
-      // (옵션) 만료시간 계산 후 전달
     });
   }
 }

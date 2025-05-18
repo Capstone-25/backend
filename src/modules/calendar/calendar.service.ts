@@ -24,7 +24,7 @@ export class CalendarService {
           HttpStatus.UNAUTHORIZED
         );
       }
-
+      console.log(user.googleAccessToken);
       const calendar = this.getGoogleCalendarClient(user.googleAccessToken);
       const response = await calendar.events.list({
         calendarId: 'primary',
@@ -42,13 +42,61 @@ export class CalendarService {
     } catch (error) {
       console.log(error);
       if (error.response?.status === 401) {
-        // 토큰이 만료된 경우 리프레시 토큰으로 갱신
+        // accessToken 만료 시 refreshToken으로 갱신 시도
         await this.refreshGoogleToken(userId);
         return this.getCalendarEvents(userId);
       }
       throw new HttpException(
         '캘린더 정보를 가져오는데 실패했습니다.',
         HttpStatus.INTERNAL_SERVER_ERROR
+      );
+    }
+  }
+
+  private async refreshGoogleToken(userId: number, retryCount = 0) {
+    if (retryCount >= 3) {
+      throw new HttpException(
+        '최대 재시도 횟수 초과',
+        HttpStatus.TOO_MANY_REQUESTS
+      );
+    }
+
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user || !user.googleRefreshToken) {
+      throw new HttpException(
+        '구글 연동이 만료되었습니다. 마이페이지에서 구글 계정 연동을 다시 해주세요.',
+        HttpStatus.UNAUTHORIZED
+      );
+    }
+
+    const oauth2Client = new google.auth.OAuth2(
+      process.env.GOOGLE_CLIENT_ID,
+      process.env.GOOGLE_CLIENT_SECRET
+    );
+
+    try {
+      oauth2Client.setCredentials({
+        refresh_token: user.googleRefreshToken,
+      });
+      const { credentials } = await oauth2Client.refreshAccessToken();
+
+      await this.prisma.user.update({
+        where: { id: userId },
+        data: {
+          googleAccessToken: credentials.access_token,
+          googleRefreshToken:
+            credentials.refresh_token || user.googleRefreshToken,
+          googleTokenExpiry: new Date(Date.now() + 1 * 60 * 60 * 1000),
+        },
+      });
+    } catch (error) {
+      console.error('토큰 갱신 실패:', error);
+      throw new HttpException(
+        '구글 연동이 만료되었습니다. 마이페이지에서 구글 계정 연동을 다시 해주세요.',
+        HttpStatus.UNAUTHORIZED
       );
     }
   }
@@ -76,54 +124,6 @@ export class CalendarService {
         },
         create: eventData,
       });
-    }
-  }
-
-  private async refreshGoogleToken(userId: number, retryCount = 0) {
-    if (retryCount >= 3) {
-      throw new HttpException(
-        '최대 재시도 횟수 초과',
-        HttpStatus.TOO_MANY_REQUESTS
-      );
-    }
-
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user || !user.googleRefreshToken) {
-      throw new HttpException(
-        '리프레시 토큰이 없습니다.',
-        HttpStatus.UNAUTHORIZED
-      );
-    }
-
-    const oauth2Client = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET
-    );
-
-    try {
-      oauth2Client.setCredentials({
-        refresh_token: user.googleRefreshToken,
-      });
-      const { credentials } = await oauth2Client.refreshAccessToken();
-
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          googleAccessToken: credentials.access_token,
-          googleRefreshToken:
-            credentials.refresh_token || user.googleRefreshToken,
-          googleTokenExpiry: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000),
-        },
-      });
-    } catch (error) {
-      console.error('토큰 갱신 실패:', error);
-      throw new HttpException(
-        '토큰 갱신에 실패했습니다.',
-        HttpStatus.UNAUTHORIZED
-      );
     }
   }
 

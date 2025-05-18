@@ -2,7 +2,10 @@ import { Controller, Get, UseGuards, Req, Body, Patch } from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@src/modules/auth/guards/jwt-auth.guard';
 import { CalendarService } from './calendar.service';
-import { CalendarEventsResponseDto } from './dto/calendar-event.dto';
+import {
+  CalendarEventsResponseDto,
+  CalendarEventDto,
+} from './dto/calendar-event.dto';
 
 @ApiTags('calendar')
 @Controller('calendar')
@@ -18,12 +21,24 @@ export class CalendarController {
     type: CalendarEventsResponseDto,
   })
   async getCalendarEvents(@Req() req): Promise<CalendarEventsResponseDto> {
+    console.log(req.user.userId);
     const events = await this.calendarService.getCalendarEvents(
       req.user.userId
     );
+    // 구글 이벤트 → CalendarEventDto로 변환
+    const eventDtos: CalendarEventDto[] = events.map(event => ({
+      id: event.id ?? '',
+      summary: event.summary ?? '',
+      description: event.description ?? '',
+      start: { dateTime: event.start?.dateTime ?? event.start?.date ?? '' },
+      end: { dateTime: event.end?.dateTime ?? event.end?.date ?? '' },
+      location: event.location ?? '',
+      // 필요에 따라 추가 필드 매핑
+    }));
+
     return {
       message: '구글 캘린더 연동 성공',
-      events,
+      events: eventDtos,
     };
   }
 
