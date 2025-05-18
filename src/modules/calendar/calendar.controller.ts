@@ -18,7 +18,9 @@ export class CalendarController {
     type: CalendarEventsResponseDto,
   })
   async getCalendarEvents(@Req() req): Promise<CalendarEventsResponseDto> {
-    const events = await this.calendarService.getCalendarEvents(req.user.id);
+    const events = await this.calendarService.getCalendarEvents(
+      req.user.userId
+    );
     return {
       message: '구글 캘린더 연동 성공',
       events,
@@ -35,7 +37,7 @@ export class CalendarController {
   })
   async getDbCalendarEvents(@Req() req): Promise<CalendarEventsResponseDto> {
     const dbEvents = await this.calendarService.getDbCalendarEvents(
-      req.user.id
+      req.user.userId
     );
     const events = dbEvents.map(event => ({
       id: event.eventId,
@@ -75,6 +77,10 @@ export class CalendarController {
     @Body() body: { eventId: string; emotion: string }
   ) {
     const { eventId, emotion } = body;
-    return this.calendarService.setEventEmotion(eventId, req.user.id, emotion);
+    return this.calendarService.setEventEmotion(
+      eventId,
+      req.user.userId,
+      emotion
+    );
   }
 }
