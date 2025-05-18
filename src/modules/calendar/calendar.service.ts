@@ -40,6 +40,7 @@ export class CalendarService {
 
       return response.data.items;
     } catch (error) {
+      console.log(error);
       if (error.response?.status === 401) {
         // 토큰이 만료된 경우 리프레시 토큰으로 갱신
         await this.refreshGoogleToken(userId);
