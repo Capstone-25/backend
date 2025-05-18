@@ -12,6 +12,7 @@ async function bootstrap() {
   app.enableCors({
     origin: '*',
     credentials: true,
+    allowedHeaders: ['Authorization', 'Content-Type'],
   });
 
   // 쿠키 파서 적용
