@@ -14,90 +14,39 @@ export class CalendarService {
 
   async getCalendarEvents(userId: number) {
     try {
-      const user = await this.prisma.user.findUnique({
-        where: { id: userId },
-      });
-
+      const user = await this.prisma.user.findUnique({ where: { id: userId } });
+      console.log(user.googleAccessToken);
       if (!user || !user.googleAccessToken) {
         throw new HttpException(
           '구글 캘린더 접근 권한이 없습니다.',
           HttpStatus.UNAUTHORIZED
         );
       }
-      console.log(user.googleAccessToken);
       const calendar = this.getGoogleCalendarClient(user.googleAccessToken);
       const response = await calendar.events.list({
         calendarId: 'primary',
         timeMin: new Date().toISOString(),
-        timeMax: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(), // 30일 후까지
+        timeMax: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         maxResults: 50,
         singleEvents: true,
         orderBy: 'startTime',
       });
-
-      // DB에 이벤트 저장
-      await this.saveEventsToDB(userId, response.data.items);
-
-      return response.data.items;
+      const items = response.data.items ?? [];
+      await this.saveEventsToDB(userId, items);
+      return items;
     } catch (error) {
       console.log(error);
-      if (error.response?.status === 401) {
-        // accessToken 만료 시 refreshToken으로 갱신 시도
-        await this.refreshGoogleToken(userId);
-        return this.getCalendarEvents(userId);
-      }
-      throw new HttpException(
-        '캘린더 정보를 가져오는데 실패했습니다.',
-        HttpStatus.INTERNAL_SERVER_ERROR
-      );
-    }
-  }
-
-  private async refreshGoogleToken(userId: number, retryCount = 0) {
-    if (retryCount >= 3) {
-      throw new HttpException(
-        '최대 재시도 횟수 초과',
-        HttpStatus.TOO_MANY_REQUESTS
-      );
-    }
-
-    const user = await this.prisma.user.findUnique({
-      where: { id: userId },
-    });
-
-    if (!user || !user.googleRefreshToken) {
-      throw new HttpException(
-        '구글 연동이 만료되었습니다. 마이페이지에서 구글 계정 연동을 다시 해주세요.',
-        HttpStatus.UNAUTHORIZED
-      );
-    }
-
-    const oauth2Client = new google.auth.OAuth2(
-      process.env.GOOGLE_CLIENT_ID,
-      process.env.GOOGLE_CLIENT_SECRET
-    );
-
-    try {
-      oauth2Client.setCredentials({
-        refresh_token: user.googleRefreshToken,
-      });
-      const { credentials } = await oauth2Client.refreshAccessToken();
-
-      await this.prisma.user.update({
-        where: { id: userId },
-        data: {
-          googleAccessToken: credentials.access_token,
-          googleRefreshToken:
-            credentials.refresh_token || user.googleRefreshToken,
-          googleTokenExpiry: new Date(Date.now() + 1 * 60 * 60 * 1000),
-        },
-      });
-    } catch (error) {
-      console.error('토큰 갱신 실패:', error);
-      throw new HttpException(
-        '구글 연동이 만료되었습니다. 마이페이지에서 구글 계정 연동을 다시 해주세요.',
-        HttpStatus.UNAUTHORIZED
-      );
+      // if (error.response?.status === 401) {
+      //   // refreshToken 없이 바로 에러 반환
+      //   throw new HttpException(
+      //     '구글 연동이 만료되었습니다. 다시 연동해주세요.',
+      //     HttpStatus.UNAUTHORIZED
+      //   );
+      // }
+      // throw new HttpException(
+      //   '캘린더 정보를 가져오는데 실패했습니다.',
+      //   HttpStatus.INTERNAL_SERVER_ERROR
+      // );
     }
   }
 

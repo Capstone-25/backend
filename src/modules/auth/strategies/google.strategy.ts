@@ -6,19 +6,21 @@ import { AuthUserDto } from '../dto/auth-user.dto';
 @Injectable()
 export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
   constructor() {
-    super({
+    const options = {
       clientID: process.env.GOOGLE_CLIENT_ID,
       clientSecret: process.env.GOOGLE_CLIENT_SECRET,
       callbackURL: 'http://localhost:8080/auth/google/callback',
       scope: ['email', 'profile', 'https://www.googleapis.com/auth/calendar'],
-      accessType: 'offline', // refresh token 발급 받기 위해필수
+      accessType: 'offline',
       prompt: 'consent',
-    });
+    };
+    console.log('GoogleStrategy options:', options);
+    super(options);
   }
 
   async validate(
     accessToken: string,
-    refreshToken: string | undefined,
+    refreshToken: string,
     profile: any,
     done: VerifyCallback
   ) {
