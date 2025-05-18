@@ -26,6 +26,8 @@ export class AuthService {
       googleRefreshToken,
     } = payload;
 
+    console.log('googleAccessToken', googleAccessToken);
+    console.log('googleRefreshToken', googleRefreshToken);
     // 1) DB에서 유저 조회
     let user = await this.prisma.user.findUnique({ where: { email } });
 

@@ -38,6 +38,7 @@ export class AuthController {
   @AuthSwagger.googleCallback.operation
   @AuthSwagger.googleCallback.response
   async googleCallback(@Req() req, @Res() res: Response) {
+    console.log('구글 콜백 라우트 진입');
     const { accessToken } = await this.authService.handleGoogleCallback(
       req.user
     );

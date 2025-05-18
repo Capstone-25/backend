@@ -26,4 +26,6 @@ export class AuthUserDto {
     enum: ['google', 'local'],
   })
   authProvider: string;
+  googleAccessToken?: string;
+  googleRefreshToken?: string;
 }
