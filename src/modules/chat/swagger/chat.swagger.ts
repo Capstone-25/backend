@@ -6,6 +6,28 @@ import { ChatResponseDto } from '../dto/ChatResponseDto';
 import { ChatMessageDto } from '../dto/ChatMessageDto';
 
 export const ChatSwagger = {
+  getChats: {
+    operation: ApiOperation({
+      summary: '채팅방 목록 조회',
+      description: '사용자의 모든 채팅방 목록을 조회합니다.',
+    }),
+    response: ApiResponse({
+      status: 200,
+      description: '채팅방 목록 조회 성공',
+      type: 'object',
+      schema: {
+        example: {
+          chatId: 1,
+          userId: 1,
+          title: '첫 번째 대화',
+          persona: '26살_한여름',
+          createdAt: '2024-05-03T12:00:00.000Z',
+          updatedAt: '2024-05-03T12:00:00.000Z',
+        },
+      },
+    }),
+  },
+
   createSession: {
     operation: ApiOperation({
       summary: '새로운 채팅방 생성',

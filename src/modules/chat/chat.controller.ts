@@ -24,6 +24,13 @@ import { CreateSessionDto } from './dto/CreateSessionDto';
 export class ChatController {
   constructor(private readonly chatService: ChatService) {}
 
+  @Get()
+  @ChatSwagger.getChats.operation
+  @ChatSwagger.getChats.response
+  async getChats(@Req() req) {
+    return this.chatService.getChats(req.user.userId);
+  }
+
   // 5. 새 채팅방 생성
   @Post()
   @ChatSwagger.createSession.operation

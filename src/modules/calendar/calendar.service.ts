@@ -15,24 +15,39 @@ export class CalendarService {
           HttpStatus.UNAUTHORIZED
         );
       }
+
+      // 1. OAuth 클라이언트 생성
       const authClient = this.createOAuthClient(user);
-      const raw = await authClient.getAccessToken();
-      const newToken = typeof raw === 'string' ? raw : raw.token;
-      // 1) 토큰 리프레시
-      if (newToken) {
-        // 1) authClient에도 반영
-        const fullCreds = {
-          ...authClient.credentials, // 기존에 load 했던 refresh_token, expiry_date 포함
-          access_token: newToken, // 새로 받은 토큰
-        };
-        authClient.setCredentials(fullCreds);
-        // 2) DB에도 저장
+
+      // 2. 토큰 갱신 시도
+      try {
+        const { credentials } = await authClient.refreshAccessToken();
+        console.log('[캘린더 연동] 토큰 갱신 성공:', credentials.access_token);
+
+        // 3. DB에 새로운 토큰 저장
         await this.prisma.user.update({
           where: { id: userId },
-          data: { googleAccessToken: newToken },
+          data: {
+            googleAccessToken: credentials.access_token,
+            googleTokenExpiry: new Date(Date.now() + 1 * 60 * 60 * 1000),
+          },
         });
+
+        // 4. 새로운 토큰으로 credentials 설정
+        authClient.setCredentials({
+          access_token: credentials.access_token,
+          refresh_token: user.googleRefreshToken,
+          expiry_date: new Date(Date.now() + 1 * 60 * 60 * 1000).getTime(),
+        });
+      } catch (refreshError) {
+        console.error('[캘린더 연동] 토큰 갱신 실패:', refreshError);
+        throw new HttpException(
+          '구글 연동이 만료되었습니다. 다시 연동해주세요.',
+          HttpStatus.UNAUTHORIZED
+        );
       }
-      console.log('authClient', authClient.credentials);
+
+      // 5. 캘린더 API 호출
       const calendar = google.calendar({ version: 'v3', auth: authClient });
       const response = await calendar.events.list({
         calendarId: 'primary',
@@ -42,15 +57,12 @@ export class CalendarService {
         singleEvents: true,
         orderBy: 'startTime',
       });
+
       const items = response.data.items ?? [];
       await this.saveEventsToDB(userId, items);
       return items;
     } catch (error) {
-      console.log('[캘린더 연동 에러]', error);
-      if (error.response?.status === 401) {
-        await this.refreshGoogleAccessToken(userId, true);
-        return this.getCalendarEvents(userId);
-      }
+      console.error('[캘린더 연동 에러]', error);
       throw new HttpException(
         '캘린더 정보를 가져오는데 실패했습니다.',
         HttpStatus.INTERNAL_SERVER_ERROR

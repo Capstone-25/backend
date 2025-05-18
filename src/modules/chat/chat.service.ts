@@ -14,6 +14,20 @@ export class ChatService {
     private readonly httpService: HttpService
   ) {}
 
+  async getChats(userId: number) {
+    const chats = await this.prisma.chatSession.findMany({
+      where: { userId },
+    });
+    return chats.map(chat => ({
+      chatId: chat.id,
+      userId: chat.userId,
+      title: chat.title,
+      persona: chat.persona,
+      createdAt: chat.createdAt,
+      updatedAt: chat.updatedAt,
+    }));
+  }
+
   // 5. 새로운 채팅방 생성
   async createSession(userId: number, title?: string) {
     const session = await this.prisma.chatSession.create({
