@@ -12,6 +12,7 @@ import { SurveyModule } from './modules/surveys/survey.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { MissionModule } from './modules/missions/mission.module';
 import { ScheduleModule } from '@nestjs/schedule';
+import { AppController } from './app.controller';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -30,5 +31,6 @@ import { ScheduleModule } from '@nestjs/schedule';
     AnalyticsModule,
     MissionModule,
   ],
+  controllers: [AppController],
 })
 export class AppModule {}
