@@ -1,10 +1,14 @@
 import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { google } from 'googleapis';
 import { PrismaService } from '@src/prisma/prisma.service';
+import { NotificationService } from '@src/modules/notification/notification.service';
 
 @Injectable()
 export class CalendarService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly notificationService: NotificationService
+  ) {}
 
   async getCalendarEvents(userId: number) {
     try {
@@ -60,6 +64,16 @@ export class CalendarService {
 
       const items = response.data.items ?? [];
       await this.saveEventsToDB(userId, items);
+      // 각 이벤트마다 알림 예약
+      for (const event of items) {
+        // eventId는 구글 이벤트의 id (DB의 calendarEvent.eventId와 동일)
+        const dbEvent = await this.prisma.calendarEvent.findUnique({
+          where: { eventId: event.id },
+        });
+        if (dbEvent) {
+          await this.notificationService.scheduleEventNotification(dbEvent.id);
+        }
+      }
       return items;
     } catch (error) {
       console.error('[캘린더 연동 에러]', error);
