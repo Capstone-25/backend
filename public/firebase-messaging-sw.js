@@ -23,7 +23,8 @@ messaging.onBackgroundMessage(payload => {
   const notificationTitle = payload.notification.title;
   const notificationOptions = {
     body: payload.notification.body,
-    icon: '/firebase-logo.png',
+    icon: '/assests/icons/notification-icon.png',
+    badge: '/assests/icons/notification-badge.png',
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);

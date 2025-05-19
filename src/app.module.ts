@@ -11,6 +11,7 @@ import { VoiceModule } from './modules/voice/voice.module';
 import { SurveyModule } from './modules/surveys/survey.module';
 import { AnalyticsModule } from './modules/analytics/analytics.module';
 import { MissionModule } from './modules/missions/mission.module';
+import { ScheduleModule } from '@nestjs/schedule';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -22,6 +23,7 @@ import { MissionModule } from './modules/missions/mission.module';
     UserModule,
     FirebaseModule,
     NotificationModule,
+    ScheduleModule.forRoot(),
     SchedulerModule,
     VoiceModule,
     SurveyModule,

@@ -10,8 +10,9 @@ export class CalendarSyncService {
     private readonly calendarService: CalendarService
   ) {}
 
-  @Cron('0 * * * *') // 1시간마다 실행
+  @Cron('* * * * *') // 1시간마다 실행
   async syncCalendars() {
+    console.log('Cron 함수 실행');
     const users = await this.prisma.user.findMany({
       where: {
         googleAccessToken: { not: null },

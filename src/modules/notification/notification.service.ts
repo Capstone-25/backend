@@ -8,6 +8,7 @@ export class NotificationService {
 
   async sendPushNotification(userId: number, title: string, body: string) {
     // 1. 사용자의 FCM 토큰 조회
+    console.log('userId', userId);
     const user = await this.prisma.user.findUnique({
       where: { id: userId },
       select: { fcmToken: true },
@@ -24,8 +25,8 @@ export class NotificationService {
       },
       webpush: {
         notification: {
-          icon: '/assets/icons/notification-icon.png',
-          badge: '/assets/icons/notification-badge.png',
+          icon: '../../../public/assests/icons/notification-icon.png',
+          badge: '../../../public/assests/icons/notification-badge.png',
           actions: [
             {
               action: 'open',
@@ -75,5 +76,14 @@ export class NotificationService {
         isSent: false,
       },
     });
+  }
+
+  // 테스트용 알림 전송
+  async sendTestNotification(userId: number) {
+    await this.sendPushNotification(
+      userId,
+      '테스트 알림',
+      '이것은 테스트 푸시 알림입니다. 정상적으로 도착하면 FCM 연동이 성공한 것입니다!'
+    );
   }
 }
