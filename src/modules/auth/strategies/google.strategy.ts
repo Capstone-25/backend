@@ -17,7 +17,6 @@ export class GoogleStrategy extends PassportStrategy(Strategy, 'google') {
         'https://www.googleapis.com/auth/calendar',
       ],
     };
-    console.log('GoogleStrategy options:', options);
     super(options);
   }
 
