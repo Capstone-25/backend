@@ -16,7 +16,7 @@ export class CalendarSyncService {
     const users = await this.prisma.user.findMany({
       where: {
         googleAccessToken: { not: null },
-        googleTokenExpiry: { gt: new Date() },
+        googleTokenExpiry: { not: null },
       },
     });
 
