@@ -23,10 +23,14 @@ export class NotificationService {
         title,
         body,
       },
+      data: {
+        title,
+        body,
+      },
       webpush: {
         notification: {
-          icon: '../../../public/assests/icons/notification-icon.png',
-          badge: '../../../public/assests/icons/notification-badge.png',
+          icon: '/assets/notification-icon.png',
+          badge: '/assets/notification-badge.png',
           actions: [
             {
               action: 'open',
@@ -82,7 +86,7 @@ export class NotificationService {
   async sendTestNotification(userId: number) {
     await this.sendPushNotification(
       userId,
-      '테스트 알림',
+      '테스트 알림222',
       '이것은 테스트 푸시 알림입니다. 정상적으로 도착하면 FCM 연동이 성공한 것입니다!'
     );
   }
