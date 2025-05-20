@@ -15,6 +15,8 @@ export class UserService {
         email: true,
         name: true,
         age: true,
+        gender: true,
+        profileImageUrl: true,
       },
     });
     return user;
