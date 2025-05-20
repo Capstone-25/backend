@@ -69,6 +69,15 @@ export class NotificationService {
     const notificationTime = new Date(event.startTime);
     notificationTime.setHours(notificationTime.getHours() - 24);
 
+    const exists = await this.prisma.notificationSchedule.findFirst({
+      where: {
+        eventId,
+        userId: event.userId,
+        scheduledTime: notificationTime,
+      },
+    });
+    if (exists) return; // 이미 예약이 있으면 추가하지 않음
+
     // 3. 알림 스케줄링
     await this.prisma.notificationSchedule.create({
       data: {
