@@ -39,7 +39,7 @@ export class NotificationService {
           ],
         },
         fcmOptions: {
-          link: '/chat', // 알림 클릭시 이동할 URL
+          link: 'https://sehxxnee.github.io/#/main', // 알림 클릭시 이동할 URL
         },
       },
     });
