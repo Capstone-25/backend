@@ -24,7 +24,7 @@ import { AppController } from './app.controller';
     UserModule,
     FirebaseModule,
     NotificationModule,
-    //ScheduleModule.forRoot(),
+    ScheduleModule.forRoot(),
     SchedulerModule,
     VoiceModule,
     SurveyModule,

@@ -4,6 +4,12 @@ import { ValidationPipe } from '@nestjs/common';
 import { AllExceptionsFilter } from './common/exceptions/all-exceptions.filter';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import * as cookieParser from 'cookie-parser';
+import { webcrypto } from 'crypto';
+
+if (typeof (globalThis as any).crypto === 'undefined') {
+  // @ts-expect-error polyfill for Node<20
+  globalThis.crypto = webcrypto;
+}
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
