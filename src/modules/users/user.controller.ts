@@ -57,7 +57,7 @@ export class UserController {
     return { success: true };
   }
 
-  @Get('basic-info/questions')
+  @Post('basic-info/questions')
   @BasicInfoSwagger.getQuestions.operation
   @BasicInfoSwagger.getQuestions.body
   @BasicInfoSwagger.getQuestions.response
