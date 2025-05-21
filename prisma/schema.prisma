@@ -54,7 +54,7 @@ model ChatMessage {
   content     String
   emotion     String?
   timestamp   DateTime    @default(now())
-  chatSession ChatSession @relation(fields: [sessionId], references: [id])
+  chatSession ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId], map: "ChatMessage_sessionId_fkey")
 }
