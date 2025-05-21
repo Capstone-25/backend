@@ -48,6 +48,7 @@ export class VoiceService {
       message,
       botResponse: response.data.botResponse,
       audioResponse: response.data.audioResponse,
+      persona: session.persona,
       timestamp: new Date(),
     };
   }
