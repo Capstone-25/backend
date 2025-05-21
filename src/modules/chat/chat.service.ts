@@ -119,6 +119,7 @@ export class ChatService {
       userId: user.userId,
       chatId: sessionId,
       botResponse: response.data.botResponse,
+      persona: session.persona,
       timestamp: new Date(),
     };
   }

@@ -29,4 +29,11 @@ export class ChatResponseDto {
   })
   @IsDate()
   timestamp: Date;
+
+  @ApiProperty({
+    description: '페르소나',
+    example: '26살_한여름',
+  })
+  @IsString()
+  persona: string;
 }
