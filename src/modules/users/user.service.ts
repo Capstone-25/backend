@@ -67,14 +67,23 @@ export class UserService {
       where: { id: userId },
       data: { age: dto.age, gender: dto.gender },
     });
-    // 2. 고민유형(카테고리 코드)에 맞는 surveyType 찾기
-    const surveyType = await this.prisma.surveyType.findFirst({
-      where: { category: { code: dto.categoryCode } },
+    // 1. categoryCode, age로 categoryId, ageGroup 결정
+    const category = await this.prisma.surveyCategory.findUnique({
+      where: { code: dto.categoryCode },
     });
-    if (!surveyType) throw new Error('해당 고민유형에 맞는 검사가 없습니다.');
-    // 3. 나이로 ageGroup 결정
-    const ageGroup = dto.age < 20 ? 'teen' : 'adult';
-    // 4. 해당 surveyType과 ageGroup에 맞는 문항 반환
+    const ageGroup = dto.age < 20 ? 'teen' : dto.age < 51 ? 'adult' : 'senior';
+
+    // 2. SurveyAssignment에서 surveyTypeId 찾기
+    const assignment = await this.prisma.surveyAssignment.findFirst({
+      where: { categoryId: category.id, ageGroup },
+    });
+    if (!assignment)
+      throw new Error('해당 고민유형/연령대에 맞는 설문이 없습니다.');
+
+    // 3. surveyTypeId로 SurveyType/SurveyQuestion 조회
+    const surveyType = await this.prisma.surveyType.findUnique({
+      where: { id: assignment.surveyTypeId },
+    });
     const questions = await this.prisma.surveyQuestion.findMany({
       where: { surveyTypeId: surveyType.id, ageGroup },
       orderBy: { order: 'asc' },

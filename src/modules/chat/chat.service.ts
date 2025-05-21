@@ -58,6 +58,7 @@ export class ChatService {
         chatSession: {
           select: {
             userId: true,
+            persona: true,
           },
         },
       },
@@ -68,6 +69,7 @@ export class ChatService {
       chatId: message.sessionId,
       userId: message.sender === 'user' ? message.chatSession.userId : 0, // 봇은 0, 사용자는 실제 userId
       message: message.content,
+      persona: message.chatSession.persona,
       createdAt: message.timestamp,
     }));
   }
