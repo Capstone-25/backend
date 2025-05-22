@@ -16,7 +16,11 @@ async function bootstrap() {
 
   // CORS 설정
   app.enableCors({
-    origin: '*',
+    origin: [
+      'http://localhost:5173',
+      'https://test-sso.online',
+      'https://sehxxnee.github.io/',
+    ],
     credentials: true,
     allowedHeaders: ['Authorization', 'Content-Type'],
   });
