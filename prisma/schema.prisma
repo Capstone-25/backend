@@ -23,8 +23,8 @@ model User {
   googleTokenExpiry         DateTime?
   age                       Int?
   fcmToken                  String?                @unique
-  level                     Int                    @default(1)
   exp                       Int                    @default(0)
+  level                     Int                    @default(1)
   calendarEvents            CalendarEvent[]
   chatAnalyses              ChatAnalysis[]
   chatSessions              ChatSession[]
