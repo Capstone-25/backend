@@ -136,8 +136,11 @@ export class ChatService {
 
   // 4. 채팅 종료 및 분석 요청
   async endSession(userId: number, sessionId: number) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
     const userMessageCount = await this.prisma.chatMessage.count({
-      where: { sessionId, sender: 'user' },
+      where: { sessionId, sender: user.name },
     });
     if (userMessageCount < 15) {
       throw new BadRequestException('15턴 이상 대화 시 분석이 가능합니다.');
