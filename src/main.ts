@@ -19,7 +19,7 @@ async function bootstrap() {
     origin: [
       'http://localhost:5173',
       'https://test-sso.online',
-      'https://sehxxnee.github.io/',
+      'https://sehxxnee.github.io',
     ],
     credentials: true,
     allowedHeaders: ['Authorization', 'Content-Type'],
