@@ -162,4 +162,9 @@ export class UserService {
     });
     return { completed: !!completed };
   }
+
+  async getExp(userId: number) {
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    return { level: user.level, exp: user.exp };
+  }
 }

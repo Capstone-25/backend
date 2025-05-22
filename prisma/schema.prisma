@@ -53,7 +53,7 @@ model ChatMessage {
   id          Int         @id @default(autoincrement())
   sessionId   Int
   sender      String
-  content     String
+  content     String      @db.Text
   emotion     String?
   timestamp   DateTime    @default(now())
   chatSession ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
@@ -207,8 +207,8 @@ model ChatAnalysis {
 model Mission {
   id          Int         @id @default(autoincrement())
   userId      Int
-  title       String
-  detail      String
+  title       String      @db.Text
+  detail      String      @db.Text
   period      String
   frequency   String
   isCompleted Boolean     @default(false)

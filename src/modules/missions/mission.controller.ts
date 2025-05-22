@@ -21,8 +21,14 @@ export class MissionController {
   @MissionSwagger.updateMissionProgress.operation
   @MissionSwagger.updateMissionProgress.param
   @MissionSwagger.updateMissionProgress.response
-  async updateMissionProgress(@Param('missionId') missionId: string) {
-    return this.missionService.incrementMissionProgress(+missionId);
+  async updateMissionProgress(
+    @Param('missionId') missionId: string,
+    @Req() req
+  ) {
+    return this.missionService.incrementMissionProgress(
+      +missionId,
+      req.user.userId
+    );
   }
 
   @Patch(':missionId/complete')
@@ -31,5 +37,16 @@ export class MissionController {
   @MissionSwagger.completeMission.response
   async completeMission(@Param('missionId') missionId: string) {
     return this.missionService.completeMission(+missionId);
+  }
+  @Patch(':missionId/completeMissionAndGiveExp')
+  @UseGuards(JwtAuthGuard)
+  async completeMissionAndGiveExp(
+    @Param('missionId') missionId: string,
+    @Req() req
+  ) {
+    return this.missionService.completeMissionAndGiveExp(
+      +missionId,
+      req.user.userId
+    );
   }
 }

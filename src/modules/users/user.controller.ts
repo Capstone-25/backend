@@ -85,4 +85,9 @@ export class UserController {
   async isBasicSurveyCompleted(@GetUser() user: any) {
     return await this.userService.isBasicSurveyCompleted(user.userId);
   }
+
+  @Get('exp')
+  async getExp(@GetUser() user: any) {
+    return await this.userService.getExp(user.userId);
+  }
 }
