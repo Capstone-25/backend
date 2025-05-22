@@ -162,6 +162,7 @@ export class ChatService {
     });
 
     // 3. 미션 저장 (Mission)
+    const randomExp = Math.floor(Math.random() * 100) + 1; // 1~100 랜덤 경험치
     if (Array.isArray(report.report.missions)) {
       for (const mission of report.report.missions) {
         await this.prisma.mission.create({
@@ -172,6 +173,7 @@ export class ChatService {
             detail: mission.detail,
             period: mission.period,
             frequency: mission.frequency,
+            missionExp: randomExp,
           },
         });
       }

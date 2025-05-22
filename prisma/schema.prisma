@@ -23,6 +23,8 @@ model User {
   googleTokenExpiry         DateTime?
   age                       Int?
   fcmToken                  String?                @unique
+  level                     Int                    @default(1)
+  exp                       Int                    @default(0)
   calendarEvents            CalendarEvent[]
   chatAnalyses              ChatAnalysis[]
   chatSessions              ChatSession[]
@@ -214,6 +216,7 @@ model Mission {
   progress    Int?        @default(0)
   createdAt   DateTime    @default(now())
   sessionId   Int
+  missionExp  Int         @default(0)
   chatSession ChatSession @relation(fields: [sessionId], references: [id])
   user        User        @relation(fields: [userId], references: [id])
 
