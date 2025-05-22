@@ -18,13 +18,27 @@ export class ChatService {
     const chats = await this.prisma.chatSession.findMany({
       where: { userId },
     });
-    return chats.map(chat => ({
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+    // 각 채팅방별 메시지 개수 조회
+    const chatIds = chats.map(chat => chat.id);
+    // 한 번에 여러 개의 count 쿼리를 날릴 수 없으니, Promise.all로 병렬 처리
+    const messageCounts = await Promise.all(
+      chatIds.map(chatId =>
+        this.prisma.chatMessage.count({
+          where: { sessionId: chatId, sender: user.name },
+        })
+      )
+    );
+    return chats.map((chat, index) => ({
       chatId: chat.id,
       userId: chat.userId,
       title: chat.title,
       persona: chat.persona,
       createdAt: chat.createdAt,
       updatedAt: chat.updatedAt,
+      isAnalyzable: messageCounts[index] >= 15,
     }));
   }
 
