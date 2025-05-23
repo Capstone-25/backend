@@ -172,8 +172,8 @@ model SurveyResult {
   label        String
   description  String?
   detail       String?    @db.LongText
-  feature      String?    @db.LongText
   advice       String?    @db.LongText
+  feature      String?    @db.LongText
   surveyType   SurveyType @relation(fields: [surveyTypeId], references: [id])
 
   @@index([surveyTypeId])
