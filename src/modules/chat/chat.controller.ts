@@ -103,4 +103,12 @@ export class ChatController {
   async greet(@Req() req, @Param('sessionId') id: string) {
     return this.chatService.greet(req.user, +id);
   }
+
+  @Patch(':sessionId/first-message')
+  async updateFirstMessage(
+    @Param('sessionId') id: string,
+    @Body() persona: string
+  ) {
+    return this.chatService.updateFirstMessage(+id, persona);
+  }
 }

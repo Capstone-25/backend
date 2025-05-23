@@ -17,32 +17,37 @@ export class NotificationService {
     if (!user?.fcmToken) return;
 
     // 2. 푸시 알림 전송
-    await admin.messaging().send({
-      token: user.fcmToken,
-      notification: {
-        title,
-        body,
-      },
-      data: {
-        title,
-        body,
-      },
-      webpush: {
+    try {
+      const result = await admin.messaging().send({
+        token: user.fcmToken,
         notification: {
-          icon: '/assets/notification-icon.png',
-          badge: '/assets/notification-badge.png',
-          actions: [
-            {
-              action: 'open',
-              title: '열기',
-            },
-          ],
+          title,
+          body,
         },
-        fcmOptions: {
-          link: 'https://sehxxnee.github.io/#/main', // 알림 클릭시 이동할 URL
+        data: {
+          title,
+          body,
         },
-      },
-    });
+        webpush: {
+          notification: {
+            icon: '/assets/notification-icon.png',
+            badge: '/assets/notification-badge.png',
+            actions: [
+              {
+                action: 'open',
+                title: '열기',
+              },
+            ],
+          },
+          fcmOptions: {
+            link: 'https://sehxxnee.github.io/#/main', // 알림 클릭시 이동할 URL
+          },
+        },
+      });
+      console.log('푸시 알림 전송 결과:', result);
+    } catch (error) {
+      console.error('푸시 알림 전송 오류:', error);
+    }
   }
 
   async scheduleEventNotification(eventId: number) {

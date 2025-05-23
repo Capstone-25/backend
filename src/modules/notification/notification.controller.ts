@@ -8,7 +8,6 @@ export class NotificationController {
   // 테스트용 푸시 알림 전송
   @Post('test')
   async sendTest(@Body('userId') userId: number) {
-    await this.notificationService.sendTestNotification(userId);
-    return { success: true };
+    return await this.notificationService.sendTestNotification(userId);
   }
 }

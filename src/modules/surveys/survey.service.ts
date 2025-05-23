@@ -39,6 +39,9 @@ export class SurveyService {
       ...userSurvey,
       resultLabel: result?.label,
       resultDescription: result?.description,
+      resultDetail: result?.detail,
+      resultFeature: result?.feature,
+      resultAdvice: result?.advice,
     };
   }
 
@@ -152,6 +155,9 @@ export class SurveyService {
       totalScore,
       interpretation: result?.label,
       userSurveyId: userSurvey.id,
+      detail: result?.detail,
+      feature: result?.feature,
+      advice: result?.advice,
     };
   }
 }
