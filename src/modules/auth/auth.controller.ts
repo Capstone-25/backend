@@ -44,8 +44,8 @@ export class AuthController {
     );
     // 프론트엔드로 리디렉션하며 accessToken을 쿼리스트링으로 전달
     return res.redirect(
-      //`http://localhost:5173/#/auth/google/callback?accessToken=${accessToken}`
-      `https://sehxxnee.github.io/#/auth/google/callback?accessToken=${accessToken}`
+      `http://localhost:5173/#/auth/google/callback?accessToken=${accessToken}`
+      //`https://sehxxnee.github.io/#/auth/google/callback?accessToken=${accessToken}`
     );
   }
 
