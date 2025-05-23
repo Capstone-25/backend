@@ -18,6 +18,7 @@ import { ChatMessageDto } from './dto/ChatMessageDto';
 import { ApiTags } from '@nestjs/swagger';
 import { ChatSwagger } from './swagger/chat.swagger';
 import { CreateSessionDto } from './dto/CreateSessionDto';
+import { Public } from '@src/common/decorators/public.decorator';
 @ApiTags('Chat')
 @Controller('chat')
 @UseGuards(JwtAuthGuard)
@@ -110,5 +111,13 @@ export class ChatController {
     @Body() persona: string
   ) {
     return this.chatService.updateFirstMessage(+id, persona);
+  }
+
+  // 테스트용: 인증 없이 모닝 푸시/챗 실행
+  @Post('test-morning-push')
+  @Public()
+  async testMorningPush() {
+    await this.chatService.sendMorningPushToAnalyzedUsers();
+    return { success: true };
   }
 }

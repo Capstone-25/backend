@@ -5,13 +5,16 @@ import axios from 'axios';
 import { HttpService } from '@nestjs/axios';
 import { ChatResponseDto } from './dto/ChatResponseDto';
 import { ChatMessageDto } from './dto/ChatMessageDto';
+import { NotificationService } from '@src/modules/notification/notification.service';
+import { Cron } from '@nestjs/schedule';
 // 구글핏
 @Injectable()
 export class ChatService {
   private aiServer = process.env.AI_SERVER_URL;
   constructor(
     private readonly prisma: PrismaService,
-    private readonly httpService: HttpService
+    private readonly httpService: HttpService,
+    private readonly notificationService: NotificationService
   ) {}
 
   async getChats(userId: number) {
@@ -266,5 +269,58 @@ export class ChatService {
         },
       });
     }
+  }
+
+  // 매일 아침 9시 분석레포트가 있는 유저에게 모닝 챗/푸시알림 전송
+  async sendMorningPushToAnalyzedUsers() {
+    // 1. 분석레포트가 존재하는 유저 조회
+    const analyzedUserIds = await this.prisma.chatAnalysis.findMany({
+      select: { userId: true },
+      distinct: ['userId'],
+    });
+    for (const { userId } of analyzedUserIds) {
+      // 2. 각 유저의 최근 채팅방 조회
+      const recentSession = await this.prisma.chatSession.findFirst({
+        where: { userId },
+        orderBy: { updatedAt: 'desc' },
+      });
+      if (!recentSession) continue;
+      // 3. 사용자 정보 조회
+      const userInfo = await this.prisma.user.findUnique({
+        where: { id: userId },
+      });
+      if (!userInfo) continue;
+      // 4. AI 서버에 모닝 메시지 생성 요청
+      const response = await axios.post(`${this.aiServer}/generate_greet`, {
+        userId,
+        chatId: recentSession.id,
+        name: userInfo.name,
+        age: userInfo.age,
+        gender: userInfo.gender,
+      });
+      const message =
+        response.data.message || response.data.greet || response.data.text;
+      // 5. 메시지 DB 저장
+      await this.prisma.chatMessage.create({
+        data: {
+          sessionId: recentSession.id,
+          sender: 'bot',
+          content: message,
+          timestamp: new Date(),
+        },
+      });
+      // 6. 푸시알림 전송
+      await this.notificationService.sendPushNotification(
+        userId,
+        '토닥이의 아침 인사',
+        message
+      );
+    }
+  }
+
+  // 매일 오전 9시에 자동 실행되는 Cron 등록
+  @Cron('0 9 * * *')
+  async handleMorningPushCron() {
+    await this.sendMorningPushToAnalyzedUsers();
   }
 }
