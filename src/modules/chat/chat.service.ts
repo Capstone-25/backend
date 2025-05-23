@@ -273,42 +273,49 @@ export class ChatService {
 
   // 매일 아침 9시 분석레포트가 있는 유저에게 모닝 챗/푸시알림 전송
   async sendMorningPushToAnalyzedUsers() {
-    // 1. 분석레포트가 존재하는 유저 조회
-    const analyzedUserIds = await this.prisma.chatAnalysis.findMany({
-      select: { userId: true },
-      distinct: ['userId'],
+    // 1. 분석레포트가 존재하는 유저별로 가장 최근 분석레포트의 sessionId(chatId) 조회
+    const latestAnalyses = await this.prisma.chatAnalysis.groupBy({
+      by: ['userId'],
+      _max: { timestamp: true },
     });
-    for (const { userId } of analyzedUserIds) {
-      // 2. 각 유저의 최근 채팅방 조회
-      const recentSession = await this.prisma.chatSession.findFirst({
-        where: { userId },
-        orderBy: { updatedAt: 'desc' },
+
+    for (const { userId, _max } of latestAnalyses) {
+      // 2. 해당 userId, timestamp로 가장 최근 chatAnalysis를 찾고, sessionId(chatId) 추출
+      const analysis = await this.prisma.chatAnalysis.findFirst({
+        where: { userId, timestamp: _max.timestamp },
+        orderBy: { timestamp: 'desc' },
       });
-      if (!recentSession) continue;
+      if (!analysis) continue;
+
+      const chatId = analysis.sessionId;
+
       // 3. 사용자 정보 조회
       const userInfo = await this.prisma.user.findUnique({
         where: { id: userId },
       });
       if (!userInfo) continue;
+
       // 4. AI 서버에 모닝 메시지 생성 요청
       const response = await axios.post(`${this.aiServer}/generate_greet`, {
         userId,
-        chatId: recentSession.id,
+        chatId,
         name: userInfo.name,
         age: userInfo.age,
         gender: userInfo.gender,
       });
       const message =
         response.data.message || response.data.greet || response.data.text;
+
       // 5. 메시지 DB 저장
       await this.prisma.chatMessage.create({
         data: {
-          sessionId: recentSession.id,
+          sessionId: chatId,
           sender: 'bot',
           content: message,
           timestamp: new Date(),
         },
       });
+
       // 6. 푸시알림 전송
       await this.notificationService.sendPushNotification(
         userId,
