@@ -51,7 +51,7 @@ async function bootstrap() {
     customSiteTitle: 'API 문서',
   });
 
-  //app.useGlobalFilters(new AllExceptionsFilter());
+  app.useGlobalFilters(new AllExceptionsFilter());
   await app.listen(process.env.PORT ?? 8080);
 }
 bootstrap();
