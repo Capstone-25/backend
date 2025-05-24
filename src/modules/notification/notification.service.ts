@@ -90,7 +90,7 @@ export class NotificationService {
         userId: event.userId,
         scheduledTime: notificationTime,
         title: '일정 알림',
-        body: `${event.summary} 일정이 24시간 후에 시작됩니다.`,
+        body: `${event.summary} 일정이 24시간 후에 시작됩니다. 이에 대해 토닥이와 대화해보세요!`,
         isSent: false,
       },
     });
