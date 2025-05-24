@@ -84,7 +84,7 @@ export class ChatService {
     return messages.map(message => ({
       id: message.id,
       chatId: message.sessionId,
-      userId: message.sender === 'user' ? message.chatSession.userId : 0, // 봇은 0, 사용자는 실제 userId
+      sender: message.sender,
       message: message.content,
       persona: message.chatSession.persona,
       createdAt: message.timestamp,

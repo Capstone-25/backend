@@ -20,8 +20,8 @@ export class ChatMessageDto {
     description: '사용자 ID (봇은 0)',
     example: 1,
   })
-  @IsInt()
-  userId: number;
+  @IsString()
+  sender: string;
 
   @ApiProperty({
     description: '메시지 내용',
