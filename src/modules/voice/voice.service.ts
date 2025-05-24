@@ -17,6 +17,14 @@ export class VoiceService {
       where: { id: sessionId },
     });
 
+    // 사용자가 보내는 메세지를 DB에 저장
+    await this.prisma.chatMessage.create({
+      data: {
+        sessionId: sessionId,
+        sender: userInfo.name,
+        content: message,
+      },
+    });
     // AI 서버에 전달할 데이터 구성
     const aiServerUrl = 'http://43.200.169.229:8000/voice_chat';
     const payload = {
