@@ -32,6 +32,7 @@ model User {
   notifications             Notification[]
   notificationSchedules     NotificationSchedule[]
   userSurveys               UserSurvey[]
+  emotions                  Emotion[]
 }
 
 model ChatSession {
@@ -56,6 +57,7 @@ model ChatMessage {
   content     String      @db.Text
   emotion     String?
   timestamp   DateTime    @default(now())
+  voiceUrl    String?
   chatSession ChatSession @relation(fields: [sessionId], references: [id], onDelete: Cascade)
 
   @@index([sessionId], map: "ChatMessage_sessionId_fkey")
@@ -225,4 +227,18 @@ model Mission {
 
   @@index([sessionId])
   @@index([userId])
+}
+
+model Emotion {
+  id          Int         @id @default(autoincrement())
+  emotion     String
+  day         DateTime
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  userId      Int
+  user        User        @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+  @@index([day])
+  @@unique([userId, day])
 }

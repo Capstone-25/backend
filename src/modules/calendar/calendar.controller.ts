@@ -1,4 +1,12 @@
-import { Controller, Get, UseGuards, Req, Body, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  UseGuards,
+  Req,
+  Body,
+  Patch,
+  Query,
+} from '@nestjs/common';
 import { ApiTags, ApiOperation, ApiResponse, ApiBody } from '@nestjs/swagger';
 import { JwtAuthGuard } from '@src/modules/auth/guards/jwt-auth.guard';
 import { CalendarService } from './calendar.service';
@@ -97,5 +105,23 @@ export class CalendarController {
       req.user.userId,
       emotion
     );
+  }
+  @Patch('emotion')
+  @UseGuards(JwtAuthGuard)
+  async upsertEmotion(
+    @Req() req,
+    @Body() body: { day: string; emotion: string }
+  ) {
+    return this.calendarService.upsertEmotion(
+      req.user.userId,
+      body.day,
+      body.emotion
+    );
+  }
+
+  @Get('emotions')
+  @UseGuards(JwtAuthGuard)
+  async getEmotionsByMonth(@Req() req, @Query('month') month: string) {
+    return this.calendarService.getEmotionsByMonth(req.user.userId, month);
   }
 }

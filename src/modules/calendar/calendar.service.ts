@@ -195,4 +195,28 @@ export class CalendarService {
 
     return oAuth2Client;
   }
+
+  // 감정 기록(생성/수정)
+  async upsertEmotion(userId: number, day: string, emotion: string) {
+    const date = new Date(day);
+    return this.prisma.emotion.upsert({
+      where: { userId_day: { userId, day: date } },
+      update: { emotion },
+      create: { userId, day: date, emotion },
+    });
+  }
+
+  // 감정 월별 조회
+  async getEmotionsByMonth(userId: number, month: string) {
+    const start = new Date(`${month}-01`);
+    const end = new Date(start);
+    end.setMonth(end.getMonth() + 1);
+    return this.prisma.emotion.findMany({
+      where: {
+        userId,
+        day: { gte: start, lt: end },
+      },
+      orderBy: { day: 'asc' },
+    });
+  }
 }

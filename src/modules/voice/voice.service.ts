@@ -46,6 +46,7 @@ export class VoiceService {
         sessionId: sessionId,
         sender: 'bot',
         content: response.data.botResponse,
+        voiceUrl: response.data.audioResponse,
       },
     });
 

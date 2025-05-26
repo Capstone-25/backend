@@ -100,8 +100,8 @@ export class NotificationService {
   async sendTestNotification(userId: number) {
     await this.sendPushNotification(
       userId,
-      '테스트 알림222',
-      '이것은 테스트 푸시 알림입니다. 정상적으로 도착하면 FCM 연동이 성공한 것입니다!'
+      '일정 알림',
+      '면접 일정이 24시간 후에 시작됩니다. 토닥이와 함께 이야기해보세요!'
     );
   }
 }
