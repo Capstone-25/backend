@@ -28,11 +28,11 @@ model User {
   calendarEvents            CalendarEvent[]
   chatAnalyses              ChatAnalysis[]
   chatSessions              ChatSession[]
+  emotions                  Emotion[]
   missions                  Mission[]
   notifications             Notification[]
   notificationSchedules     NotificationSchedule[]
   userSurveys               UserSurvey[]
-  emotions                  Emotion[]
 }
 
 model ChatSession {
@@ -230,15 +230,15 @@ model Mission {
 }
 
 model Emotion {
-  id          Int         @id @default(autoincrement())
-  emotion     String
-  day         DateTime
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  userId      Int
-  user        User        @relation(fields: [userId], references: [id])
+  id        Int      @id @default(autoincrement())
+  emotion   String
+  day       DateTime
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  userId    Int
+  user      User     @relation(fields: [userId], references: [id])
 
+  @@unique([userId, day])
   @@index([userId])
   @@index([day])
-  @@unique([userId, day])
 }
