@@ -86,6 +86,7 @@ export class ChatService {
       chatId: message.sessionId,
       sender: message.sender,
       message: message.content,
+      voiceUrl: message.voiceUrl || null,
       persona: message.chatSession.persona,
       createdAt: message.timestamp,
     }));
