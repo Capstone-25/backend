@@ -145,46 +145,59 @@ export class ChatService {
   }
 
   async updateFirstMessage(sessionId: number, persona: string) {
-    if (persona === '26살_한여름') {
-      await this.prisma.chatSession.update({
-        where: {
-          id: sessionId,
-        },
-        data: { persona: '26살_한여름' },
-      });
-      await this.prisma.chatMessage.create({
-        data: {
-          sessionId,
-          sender: 'bot',
-          content: '26살_한여름입니다! 무엇이 궁금한가요?',
-        },
-      });
-    } else if (persona === '8살_민지원') {
-      await this.prisma.chatSession.update({
-        where: {
-          id: sessionId,
-        },
-        data: { persona: '8살_민지원' },
-      });
-      await this.prisma.chatMessage.create({
-        data: {
-          sessionId,
-          sender: 'bot',
-          content: '8살_민지원입니다! 무엇이 궁금하신가요?',
-        },
-      });
+    const chatMessageCount = await this.prisma.chatMessage.count({
+      where: { sessionId },
+    });
+    if (chatMessageCount === 0) {
+      if (persona === '26살_한여름') {
+        await this.prisma.chatSession.update({
+          where: {
+            id: sessionId,
+          },
+          data: { persona: '26살_한여름' },
+        });
+        await this.prisma.chatMessage.create({
+          data: {
+            sessionId,
+            sender: 'bot',
+            content: '26살_한여름입니다! 무엇이 궁금한가요?',
+          },
+        });
+      } else if (persona === '8살_민지원') {
+        await this.prisma.chatSession.update({
+          where: {
+            id: sessionId,
+          },
+          data: { persona: '8살_민지원' },
+        });
+        await this.prisma.chatMessage.create({
+          data: {
+            sessionId,
+            sender: 'bot',
+            content: '8살_민지원입니다! 무엇이 궁금하신가요?',
+          },
+        });
+      } else {
+        await this.prisma.chatSession.update({
+          where: {
+            id: sessionId,
+          },
+          data: { persona: '55살_김서연' },
+        });
+        await this.prisma.chatMessage.create({
+          data: {
+            sessionId,
+            sender: 'bot',
+            content: '55살 김서연입니다! 무엇이 궁금한가요?',
+          },
+        });
+      }
     } else {
-      await this.prisma.chatSession.update({
-        where: {
-          id: sessionId,
-        },
-        data: { persona: '55살_김서연' },
-      });
       await this.prisma.chatMessage.create({
         data: {
           sessionId,
           sender: 'bot',
-          content: '55살 김서연입니다! 무엇이 궁금한가요?',
+          content: `페르소나가 ${persona}(으)로 변경되었어요. 새롭게 대화를 시작해볼까요?`,
         },
       });
     }
