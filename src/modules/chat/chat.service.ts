@@ -198,7 +198,7 @@ export class ChatService {
         data: {
           sessionId,
           sender: 'bot',
-          content: `페르소나가 ${personaName}(으)로 변경되었어요. 새롭게 대화를 시작해볼까요?`,
+          content: `페르소나가 ${personaName}(으)로 변경되었어요. 새롭게 대화를 시작해요!`,
         },
       });
     }
