@@ -160,7 +160,7 @@ export class ChatService {
           data: {
             sessionId,
             sender: 'bot',
-            content: '26살_한여름입니다! 무엇이 궁금한가요?',
+            content: '난 26살 한여름이야 반가워!',
           },
         });
       } else if (persona === '8살_민지원') {
@@ -174,7 +174,7 @@ export class ChatService {
           data: {
             sessionId,
             sender: 'bot',
-            content: '8살_민지원입니다! 무엇이 궁금하신가요?',
+            content: '난 8살 민지원이야 반가워!',
           },
         });
       } else {
@@ -188,7 +188,7 @@ export class ChatService {
           data: {
             sessionId,
             sender: 'bot',
-            content: '55살 김서연입니다! 무엇이 궁금한가요?',
+            content: '55살 김서연입니다. 반가워요!',
           },
         });
       }
