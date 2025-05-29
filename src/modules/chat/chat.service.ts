@@ -193,16 +193,21 @@ export class ChatService {
         });
       }
     } else {
+      const personaName = await this.getPersonaDisplayName(persona);
       await this.prisma.chatMessage.create({
         data: {
           sessionId,
           sender: 'bot',
-          content: `페르소나가 ${persona}(으)로 변경되었어요. 새롭게 대화를 시작해볼까요?`,
+          content: `페르소나가 ${personaName}(으)로 변경되었어요. 새롭게 대화를 시작해볼까요?`,
         },
       });
     }
   }
 
+  private async getPersonaDisplayName(personaName?: string) {
+    const parts = personaName.split('_');
+    return parts.length > 1 ? parts[1] : personaName;
+  }
   // 3. 페르소나 변경
   // 페르소나 변경시 하드코딩된 메세지를 DB에 저장
   async changePersona(sessionId: number, persona: string) {
