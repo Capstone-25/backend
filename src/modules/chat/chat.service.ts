@@ -174,7 +174,7 @@ export class ChatService {
           data: {
             sessionId,
             sender: 'bot',
-            content: '난 8살 민지원이야 반가워!',
+            content: '저는 8살 민지원이에요 반가워요!',
           },
         });
       } else {
@@ -188,7 +188,7 @@ export class ChatService {
           data: {
             sessionId,
             sender: 'bot',
-            content: '55살 김서연입니다. 반가워요!',
+            content: '저는 55살 김서연이에요 반가워요!',
           },
         });
       }
